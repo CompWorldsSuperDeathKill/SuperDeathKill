@@ -194,8 +194,11 @@ Entity.prototype.rotateAndCache = function (image, angle) {
 // GameBoard code below
 
 function GameBoard() {
-
     Entity.call(this, null, 0, 0);
+}
+
+function Background(game) {
+    Entity.call(this, game, 0, 800);
 }
 
 GameBoard.prototype = new Entity();
@@ -206,6 +209,12 @@ GameBoard.prototype.update = function () {
 }
 
 GameBoard.prototype.draw = function (ctx) {
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(700, 0, 1, 700);
+    ctx.fillStyle = "#bdb76b";
+    ctx.fillRect(701, 0, 200, 700);
+    ctx.fillStyle = "#696969";
+    ctx.fillRect(325, 325, 50, 50);
 }
 
 // the "main" code begins here
