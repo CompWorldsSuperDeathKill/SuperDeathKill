@@ -168,7 +168,7 @@ GameEngine.prototype.startInput = function () {
     var that = this;
 
     this.ctx.canvas.addEventListener("click", function (e) {
-        that.click = getXandY(e);
+    	that.click = true;
     }, false);
 
     this.ctx.canvas.addEventListener("mousemove", function (e) {
@@ -181,7 +181,9 @@ GameEngine.prototype.startInput = function () {
     }, false);
 
     this.ctx.canvas.addEventListener("keydown", function (e) {
-        if (String.fromCharCode(e.which) === 'w') that.w = true;
+        if (String.fromCharCode(e.which) === ' ') {
+        	that.w = true;
+        }
         e.preventDefault();
     }, false);
 
@@ -300,13 +302,14 @@ Hero.prototype.constructor = Hero;
 
 Hero.prototype.update = function () {
     if (this.game.w) this.movingUP = true;
+    if (this.game.click) this.movingUP = true;
 
     Entity.prototype.update.call(this);
 }
 
 Hero.prototype.draw = function (ctx) {
     if (this.movingUP) {
-        this.jumpAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y += 50);
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= 50);
         this.movingUP = false;
     } else {
         this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
