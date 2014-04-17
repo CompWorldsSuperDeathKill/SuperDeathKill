@@ -46,11 +46,80 @@ AssetManager.prototype.downloadAll = function (callback) {
     }
 }
 
-AssetManager.prototype.getAsset = function(path){
+AssetManager.prototype.getAsset = function (path) {
     //console.log(path.toString());
     return this.cache[path];
 }
 
+function Animation(spriteSheet, startX, startY, frameWidth, frameHeight, frameDuration, frames, loop, reverse) {
+    this.spriteSheet = spriteSheet;
+    this.startX = startX;
+    this.startY = startY;
+    this.frameWidth = frameWidth;
+    this.frameDuration = frameDuration;
+    this.frameHeight = frameHeight;
+    this.frames = frames;
+    this.totalTime = frameDuration * frames;
+    this.elapsedTime = 0;
+    this.loop = loop;
+    this.reverse = reverse;
+}
+
+Animation.prototype.drawFrame = function (tick, ctx, x, y, scaleBy) {
+    var scaleBy = scaleBy || 1;
+    this.elapsedTime += tick;
+    if (this.loop) {
+        if (this.isDone()) {
+            this.elapsedTime = 0;
+        }
+    } else if (this.isDone()) {
+        return;
+    }
+    var index = this.reverse ? this.frames - this.currentFrame() - 1 : this.currentFrame();
+    var vindex = 0;
+    if ((index + 1) * this.frameWidth + this.startX > this.spriteSheet.width) {
+        index -= Math.floor((this.spriteSheet.width - this.startX) / this.frameWidth);
+        vindex++;
+    }
+    while ((index + 1) * this.frameWidth > this.spriteSheet.width) {
+        index -= Math.floor(this.spriteSheet.width / this.frameWidth);
+        vindex++;
+    }
+
+    var locX = x;
+    var locY = y;
+    var offset = vindex === 0 ? this.startX : 0;
+    ctx.drawImage(this.spriteSheet,
+                  index * this.frameWidth + offset, vindex * this.frameHeight + this.startY,  // source from sheet
+                  this.frameWidth, this.frameHeight,
+                  locX, locY,
+                  this.frameWidth * scaleBy,
+                  this.frameHeight * scaleBy);
+}
+
+Animation.prototype.currentFrame = function () {
+    return Math.floor(this.elapsedTime / this.frameDuration);
+}
+
+Animation.prototype.isDone = function () {
+    return (this.elapsedTime >= this.totalTime);
+}
+
+function Timer() {
+    this.gameTime = 0;
+    this.maxStep = 0.05;
+    this.wallLastTimestamp = 0;
+}
+
+Timer.prototype.tick = function () {
+    var wallCurrent = Date.now();
+    var wallDelta = (wallCurrent - this.wallLastTimestamp) / 1000;
+    this.wallLastTimestamp = wallCurrent;
+
+    var gameDelta = Math.min(wallDelta, this.maxStep);
+    this.gameTime += gameDelta;
+    return gameDelta;
+}
 
 function GameEngine() {
     this.entities = [];
@@ -58,6 +127,7 @@ function GameEngine() {
     this.click = null;
     this.mouse = null;
     this.wheel = null;
+    this.w = null;
     this.surfaceWidth = null;
     this.surfaceHeight = null;
 }
@@ -67,7 +137,7 @@ GameEngine.prototype.init = function (ctx) {
     this.surfaceWidth = this.ctx.canvas.width;
     this.surfaceHeight = this.ctx.canvas.height;
     this.startInput();
-
+    this.timer = new Timer();
     console.log('game initialized');
 }
 
@@ -107,6 +177,12 @@ GameEngine.prototype.startInput = function () {
 
     this.ctx.canvas.addEventListener("mousewheel", function (e) {
         that.wheel = e;
+        e.preventDefault();
+    }, false);
+
+    this.ctx.canvas.addEventListener("keydown", function (e) {
+        if (String.fromCharCode(e.which) === 'w') that.w = true;
+        e.preventDefault();
     }, false);
 
     console.log('Input started');
@@ -148,8 +224,10 @@ GameEngine.prototype.update = function () {
 }
 
 GameEngine.prototype.loop = function () {
+    this.clockTick = this.timer.tick();
     this.update();
     this.draw();
+    this.w = null;
     this.click = null;
     this.wheel = null;
 }
@@ -193,33 +271,53 @@ Entity.prototype.rotateAndCache = function (image, angle) {
 
 // GameBoard code below
 
-function GameBoard() {
-    Entity.call(this, null, 0, 0);
-}
-
 function Background(game) {
-    Entity.call(this, game, 0, 800);
+    Entity.call(this, game, 0, 400);
 }
 
-GameBoard.prototype = new Entity();
-GameBoard.prototype.constructor = GameBoard;
+Background.prototype = new Entity();
+Background.prototype.constructor = Background;
 
-GameBoard.prototype.update = function () {
+Background.prototype.update = function () {
     Entity.prototype.update.call(this);
 }
 
-GameBoard.prototype.draw = function (ctx) {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(700, 0, 1, 700);
-    ctx.fillStyle = "#bdb76b";
-    ctx.fillRect(701, 0, 200, 700);
-    ctx.fillStyle = "#696969";
-    ctx.fillRect(325, 325, 50, 50);
+Background.prototype.draw = function (ctx) {
+    ctx.fillStyle = "Black";
+    ctx.fillRect(700, 0, 200, 700);
+
+}
+
+function Hero(game) {
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/test_hero.png"), 0, 0, 32, 32, 0.1, 6, true, false);
+    this.movingUP = false;
+
+    Entity.call(this, game, 0, 400);
+}
+
+Hero.prototype = new Entity();
+Hero.prototype.constructor = Hero;
+
+Hero.prototype.update = function () {
+    if (this.game.w) this.movingUP = true;
+
+    Entity.prototype.update.call(this);
+}
+
+Hero.prototype.draw = function (ctx) {
+    if (this.movingUP) {
+        this.jumpAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y += 50);
+        this.movingUP = false;
+    } else {
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+    }
 }
 
 // the "main" code begins here
 
 var ASSET_MANAGER = new AssetManager();
+
+ASSET_MANAGER.queueDownload("./img/test_hero.png");
 
 ASSET_MANAGER.downloadAll(function () {
     console.log("starting up da sheild");
@@ -227,10 +325,12 @@ ASSET_MANAGER.downloadAll(function () {
     var ctx = canvas.getContext('2d');
 
     var gameEngine = new GameEngine();
-    var gameboard = new GameBoard();
+    var bg = new Background(gameEngine);
+    var hero = new Hero(gameEngine);
 
-    gameEngine.addEntity(gameboard);
- 
+    gameEngine.addEntity(bg);
+    gameEngine.addEntity(hero);
+
     gameEngine.init(ctx);
     gameEngine.start();
 });
