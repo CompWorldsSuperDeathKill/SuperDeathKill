@@ -181,11 +181,31 @@ GameEngine.prototype.startInput = function () {
     }, false);
 
     this.ctx.canvas.addEventListener("keydown", function (e) {
-        if (String.fromCharCode(e.which) === ' ') {
+        if (String.fromCharCode(e.which) === 'W') {
         	that.w = true;
+        } else if (String.fromCharCode(e.which) === 'A') {
+        	that.a = true;
+        } else if (String.fromCharCode(e.which) === 'S') {
+        	that.s = true;
+        } else if (String.fromCharCode(e.which) === 'D') {
+        	that.d = true;
         }
         e.preventDefault();
     }, false);
+    
+    this.ctx.canvas.addEventListener("keyup", function (e) {
+    	if (String.fromCharCode(e.which) === 'W') {
+        	that.w = false;
+        } else if (String.fromCharCode(e.which) === 'A') {
+        	that.a = false;
+        } else if (String.fromCharCode(e.which) === 'S') {
+        	that.s = false;
+        } else if (String.fromCharCode(e.which) === 'D') {
+        	that.d = false;
+        }
+        e.preventDefault();
+    }, false);
+    
 
     console.log('Input started');
 }
@@ -229,8 +249,11 @@ GameEngine.prototype.loop = function () {
     this.clockTick = this.timer.tick();
     this.update();
     this.draw();
-    this.w = null;
-    this.click = null;
+    //this.w = null;
+    //this.a = null;
+    //this.s = null;
+    //this.d = null;
+    //this.click = null;
     this.wheel = null;
 }
 
@@ -293,6 +316,9 @@ Background.prototype.draw = function (ctx) {
 function Hero(game) {
     this.animation = new Animation(ASSET_MANAGER.getAsset("./img/test_hero.png"), 0, 0, 32, 32, 0.1, 6, true, false);
     this.movingUP = false;
+    this.movingLEFT = false;
+    this.movingDOWN = false;
+    this.movingRIGHT = false;
 
     Entity.call(this, game, 0, 400);
 }
@@ -302,17 +328,42 @@ Hero.prototype.constructor = Hero;
 
 Hero.prototype.update = function () {
     if (this.game.w) this.movingUP = true;
-    if (this.game.click) this.movingUP = true;
+    if (this.game.a) this.movingLEFT = true;
+    if (this.game.s) this.movingDOWN = true;
+    if (this.game.d) this.movingRIGHT = true;
 
     Entity.prototype.update.call(this);
 }
 
 Hero.prototype.draw = function (ctx) {
+    this.movingSpeed = 5;
     if (this.movingUP) {
-        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= 50);
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
         this.movingUP = false;
+    } else if (this.movingLEFT) {
+    	this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
+    	this.movingLEFT = false;
+    } else if (this.movingDOWN) {
+    	this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
+    	this.movingDOWN = false;
+    } else if (this.movingRIGHT) {
+    	this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
+    	this.movingRIGHT = false;
     } else {
         this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+    }
+    
+    if (this.x > 668) { //hardcoded values bad. change later!
+    	this.x = -20;
+    } 
+    if (this.x < -20) {
+    	this.x = 668;
+    }
+    if (this.y > 700) {
+    	this.y = -20;
+    }
+    if (this.y < -20) {
+    	this.y = 700;
     }
 }
 
