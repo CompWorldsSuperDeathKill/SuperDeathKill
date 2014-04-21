@@ -151,6 +151,8 @@ GameEngine.prototype.start = function () {
 }
 
 GameEngine.prototype.startInput = function () {
+	var map = [];
+	
     console.log('Starting input');
 
     var getXandY = function (e) {
@@ -179,32 +181,51 @@ GameEngine.prototype.startInput = function () {
         that.wheel = e;
         e.preventDefault();
     }, false);
-
+    
+    
     this.ctx.canvas.addEventListener("keydown", function (e) {
-        if (String.fromCharCode(e.which) === 'W') {
-        	that.w = true;
-        } else if (String.fromCharCode(e.which) === 'A') {
-        	that.a = true;
-        } else if (String.fromCharCode(e.which) === 'S') {
-        	that.s = true;
-        } else if (String.fromCharCode(e.which) === 'D') {
-        	that.d = true;
+    	
+    	map[e.keyCode] = true;
+        
+        for (var i = 0; i < 128; i++) {
+        	if (map[87]) {
+        		that.w = true;
+        	}
+        	if (map[65]) {
+        		that.a = true;
+        	}
+        	if (map[83]) {
+        		that.s = true;
+        	}
+        	if (map[68]) {
+        		that.d = true;
+        	}
         }
+        
         e.preventDefault();
     }, false);
     
     this.ctx.canvas.addEventListener("keyup", function (e) {
-    	if (String.fromCharCode(e.which) === 'W') {
-        	that.w = false;
-        } else if (String.fromCharCode(e.which) === 'A') {
-        	that.a = false;
-        } else if (String.fromCharCode(e.which) === 'S') {
-        	that.s = false;
-        } else if (String.fromCharCode(e.which) === 'D') {
-        	that.d = false;
+
+    	map[e.keyCode] = false;
+
+        for (var i = 0; i < 128; i++) {
+        	if (e.keyCode === 87) {
+        		that.w = false;
+        	}
+        	if (e.keyCode === 65) {
+        		that.a = false;
+        	}
+        	if (e.keyCode === 83) {
+        		that.s = false;
+        	}
+        	if (e.keyCode === 68) {
+        		that.d = false;
+        	}
         }
         e.preventDefault();
     }, false);
+    
     
 
     console.log('Input started');
@@ -308,8 +329,11 @@ Background.prototype.update = function () {
 }
 
 Background.prototype.draw = function (ctx) {
-    ctx.fillStyle = "Black";
-    ctx.fillRect(700, 0, 200, 700);
+	ctx.drawImage(ASSET_MANAGER.getAsset("./img/stats.png"), 700, 0, 200, 700);
+	ctx.drawImage(ASSET_MANAGER.getAsset("./img/castle.png"), 300, 300, 100, 100);
+	
+    //ctx.fillStyle = "Black";
+    //ctx.fillRect(700, 0, 200, 700);
 
 }
 
@@ -326,32 +350,27 @@ function Hero(game) {
 Hero.prototype = new Entity();
 Hero.prototype.constructor = Hero;
 
-Hero.prototype.update = function () {
-    if (this.game.w) this.movingUP = true;
-    if (this.game.a) this.movingLEFT = true;
-    if (this.game.s) this.movingDOWN = true;
-    if (this.game.d) this.movingRIGHT = true;
+Hero.prototype.update = function () {	
+	this.movingUP = this.game.w;
+	this.movingLEFT = this.game.a;
+	this.movingDOWN = this.game.s;
+	this.movingRIGHT = this.game.d;
 
     Entity.prototype.update.call(this);
 }
 
 Hero.prototype.draw = function (ctx) {
     this.movingSpeed = 5;
-    if (this.movingUP) {
+    if (this.movingUP) 
         this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
-        this.movingUP = false;
-    } else if (this.movingLEFT) {
+    if (this.movingLEFT) 
     	this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
-    	this.movingLEFT = false;
-    } else if (this.movingDOWN) {
+    if (this.movingDOWN) 
     	this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
-    	this.movingDOWN = false;
-    } else if (this.movingRIGHT) {
+    if (this.movingRIGHT) 
     	this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
-    	this.movingRIGHT = false;
-    } else {
-        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
-    }
+
+    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     
     if (this.x > 668) { //hardcoded values bad. change later!
     	this.x = -20;
@@ -372,6 +391,8 @@ Hero.prototype.draw = function (ctx) {
 var ASSET_MANAGER = new AssetManager();
 
 ASSET_MANAGER.queueDownload("./img/test_hero.png");
+ASSET_MANAGER.queueDownload("./img/stats.png");
+ASSET_MANAGER.queueDownload("./img/castle.png");
 
 ASSET_MANAGER.downloadAll(function () {
     console.log("starting up da sheild");
