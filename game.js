@@ -337,6 +337,50 @@ Background.prototype.draw = function (ctx) {
 
 }
 
+function Bastardman(game) {
+	this.animation = new Animation(ASSET_MANAGER.getAsset("./img/goomba.png"), 0, 0, 256, 256, 1, 1, true, false);
+	
+	var spawnWhere = Math.floor(Math.random() * 3);
+	var randX;
+	var randY;
+	
+	if (spawnWhere === 0) { //spawn on the top
+		randY = -256;
+		randX = Math.floor(Math.random() * 700);
+	} else if (spawnWhere === 1) { //spawn on the left
+		randX = -256;
+		randY = Math.floor(Math.random() * 700);
+	} else if (spawnWhere === 2) { //spawn on the bottom
+		randY = 700;
+		randX = Math.floor(Math.random() * 700);
+	}
+	
+	Entity.call(this, game, randX, randY);
+}
+
+Bastardman.prototype = new Entity();
+Bastardman.prototype.constructor = Bastardman;
+
+Bastardman.prototype.update = function () {	
+    Entity.prototype.update.call(this);
+}
+
+Bastardman.prototype.draw = function (ctx) {
+	if (this.x > 225) {
+		this.x--;
+	} else if (this.x < 225) {
+		this.x++;
+	}
+	
+	if (this.y > 225) {
+		this.y--;
+	} else if (this.y < 225) {
+		this.y++;
+	}
+	
+	this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+}
+
 function Hero(game) {
     this.animation = new Animation(ASSET_MANAGER.getAsset("./img/test_hero.png"), 0, 0, 32, 32, 0.1, 6, true, false);
     this.movingUP = false;
@@ -393,6 +437,7 @@ var ASSET_MANAGER = new AssetManager();
 ASSET_MANAGER.queueDownload("./img/test_hero.png");
 ASSET_MANAGER.queueDownload("./img/stats.png");
 ASSET_MANAGER.queueDownload("./img/castle.png");
+ASSET_MANAGER.queueDownload("./img/goomba.png");
 
 ASSET_MANAGER.downloadAll(function () {
     console.log("starting up da sheild");
@@ -402,9 +447,11 @@ ASSET_MANAGER.downloadAll(function () {
     var gameEngine = new GameEngine();
     var bg = new Background(gameEngine);
     var hero = new Hero(gameEngine);
+    var bastardman = new Bastardman(gameEngine);
 
     gameEngine.addEntity(bg);
     gameEngine.addEntity(hero);
+    gameEngine.addEntity(bastardman);
 
     gameEngine.init(ctx);
     gameEngine.start();
