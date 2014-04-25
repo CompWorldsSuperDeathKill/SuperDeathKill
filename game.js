@@ -381,12 +381,14 @@ Bastardman.prototype.draw = function (ctx) {
 	this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
 }
 
+
 function Hero(game) {
-    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/test_hero.png"), 0, 0, 32, 32, 0.1, 6, true, false);
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 0, 0, 54, 66, 0, 1, true, false);
     this.movingUP = false;
     this.movingLEFT = false;
     this.movingDOWN = false;
     this.movingRIGHT = false;
+    this.flag = 0;
 
     Entity.call(this, game, 0, 400);
 }
@@ -405,14 +407,48 @@ Hero.prototype.update = function () {
 
 Hero.prototype.draw = function (ctx) {
     this.movingSpeed = 5;
-    if (this.movingUP) 
+
+    
+
+    if (this.movingUP) {
+        
         this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
-    if (this.movingLEFT) 
-    	this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
-    if (this.movingDOWN) 
-    	this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
-    if (this.movingRIGHT) 
-    	this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
+    }
+
+    if (this.movingLEFT) {
+        if (this.flag === 2) {
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
+        } else {
+            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 0, 85, 60, 66, .1, 2, true, false);
+            this.flag = 2;
+        }
+        
+    }
+    	
+    if (this.movingDOWN) {
+        if (this.flag === 3) {
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
+        } else {
+            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 12, 0, 54, 66, .1, 4, true, false);
+            this.flag = 3;
+        }
+        
+        
+        
+    }
+    	
+    if (this.movingRIGHT) {
+        if (this.flag === 4) {
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
+        } else {
+            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 145, 85, 80, 66, .1, 2, true, false);
+            this.flag = 4;
+        }
+        
+        
+    }
+        
+        
 
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     
@@ -438,6 +474,7 @@ ASSET_MANAGER.queueDownload("./img/test_hero.png");
 ASSET_MANAGER.queueDownload("./img/stats.png");
 ASSET_MANAGER.queueDownload("./img/castle.png");
 ASSET_MANAGER.queueDownload("./img/goomba.png");
+ASSET_MANAGER.queueDownload("./img/sprite_test.png");
 
 ASSET_MANAGER.downloadAll(function () {
     console.log("starting up da sheild");
