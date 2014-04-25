@@ -1,5 +1,7 @@
 // This game shell was happily copied from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
 
+// This game shell was happily copied from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
+
 window.requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
@@ -151,8 +153,8 @@ GameEngine.prototype.start = function () {
 }
 
 GameEngine.prototype.startInput = function () {
-	var map = [];
-	
+    var map = [];
+
     console.log('Starting input');
 
     var getXandY = function (e) {
@@ -170,7 +172,7 @@ GameEngine.prototype.startInput = function () {
     var that = this;
 
     this.ctx.canvas.addEventListener("click", function (e) {
-    	that.click = true;
+        that.click = true;
     }, false);
 
     this.ctx.canvas.addEventListener("mousemove", function (e) {
@@ -181,52 +183,52 @@ GameEngine.prototype.startInput = function () {
         that.wheel = e;
         e.preventDefault();
     }, false);
-    
-    
+
+
     this.ctx.canvas.addEventListener("keydown", function (e) {
-    	
-    	map[e.keyCode] = true;
-        
+
+        map[e.keyCode] = true;
+
         for (var i = 0; i < 128; i++) {
-        	if (map[87]) {
-        		that.w = true;
-        	}
-        	if (map[65]) {
-        		that.a = true;
-        	}
-        	if (map[83]) {
-        		that.s = true;
-        	}
-        	if (map[68]) {
-        		that.d = true;
-        	}
+            if (map[87]) {
+                that.w = true;
+            }
+            if (map[65]) {
+                that.a = true;
+            }
+            if (map[83]) {
+                that.s = true;
+            }
+            if (map[68]) {
+                that.d = true;
+            }
         }
-        
+
         e.preventDefault();
     }, false);
-    
+
     this.ctx.canvas.addEventListener("keyup", function (e) {
 
-    	map[e.keyCode] = false;
+        map[e.keyCode] = false;
 
         for (var i = 0; i < 128; i++) {
-        	if (e.keyCode === 87) {
-        		that.w = false;
-        	}
-        	if (e.keyCode === 65) {
-        		that.a = false;
-        	}
-        	if (e.keyCode === 83) {
-        		that.s = false;
-        	}
-        	if (e.keyCode === 68) {
-        		that.d = false;
-        	}
+            if (e.keyCode === 87) {
+                that.w = false;
+            }
+            if (e.keyCode === 65) {
+                that.a = false;
+            }
+            if (e.keyCode === 83) {
+                that.s = false;
+            }
+            if (e.keyCode === 68) {
+                that.d = false;
+            }
         }
         e.preventDefault();
     }, false);
-    
-    
+
+
 
     console.log('Input started');
 }
@@ -329,61 +331,61 @@ Background.prototype.update = function () {
 }
 
 Background.prototype.draw = function (ctx) {
-	ctx.drawImage(ASSET_MANAGER.getAsset("./img/stats.png"), 700, 0, 200, 700);
-	ctx.drawImage(ASSET_MANAGER.getAsset("./img/castle.png"), 300, 300, 100, 100);
-	
+    ctx.drawImage(ASSET_MANAGER.getAsset("./img/stats.png"), 700, 0, 200, 700);
+    ctx.drawImage(ASSET_MANAGER.getAsset("./img/castle.png"), 300, 300, 100, 100);
+
     //ctx.fillStyle = "Black";
     //ctx.fillRect(700, 0, 200, 700);
 
 }
 
 function Bastardman(game) {
-	this.animation = new Animation(ASSET_MANAGER.getAsset("./img/goomba.png"), 0, 0, 256, 256, 1, 1, true, false);
-	
-	var spawnWhere = Math.floor(Math.random() * 3);
-	var randX;
-	var randY;
-	
-	if (spawnWhere === 0) { //spawn on the top
-		randY = -256;
-		randX = Math.floor(Math.random() * 700);
-	} else if (spawnWhere === 1) { //spawn on the left
-		randX = -256;
-		randY = Math.floor(Math.random() * 700);
-	} else if (spawnWhere === 2) { //spawn on the bottom
-		randY = 700;
-		randX = Math.floor(Math.random() * 700);
-	}
-	
-	Entity.call(this, game, randX, randY);
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/goomba.png"), 0, 0, 256, 256, 1, 1, true, false);
+
+    var spawnWhere = Math.floor(Math.random() * 3);
+    var randX;
+    var randY;
+
+    if (spawnWhere === 0) { //spawn on the top
+        randY = -256;
+        randX = Math.floor(Math.random() * 700);
+    } else if (spawnWhere === 1) { //spawn on the left
+        randX = -256;
+        randY = Math.floor(Math.random() * 700);
+    } else if (spawnWhere === 2) { //spawn on the bottom
+        randY = 700;
+        randX = Math.floor(Math.random() * 700);
+    }
+
+    Entity.call(this, game, randX, randY);
 }
 
 Bastardman.prototype = new Entity();
 Bastardman.prototype.constructor = Bastardman;
 
-Bastardman.prototype.update = function () {	
+Bastardman.prototype.update = function () {
     Entity.prototype.update.call(this);
 }
 
 Bastardman.prototype.draw = function (ctx) {
-	if (this.x > 225) {
-		this.x--;
-	} else if (this.x < 225) {
-		this.x++;
-	}
-	
-	if (this.y > 225) {
-		this.y--;
-	} else if (this.y < 225) {
-		this.y++;
-	}
-	
-	this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+    if (this.x > 225) {
+        this.x--;
+    } else if (this.x < 225) {
+        this.x++;
+    }
+
+    if (this.y > 225) {
+        this.y--;
+    } else if (this.y < 225) {
+        this.y++;
+    }
+
+    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
 }
 
 
 function Hero(game) {
-    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 0, 0, 54, 66, 0, 1, true, false);
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 12, 0, 54, 66, .1, 1, true, false);
     this.movingUP = false;
     this.movingLEFT = false;
     this.movingDOWN = false;
@@ -396,11 +398,11 @@ function Hero(game) {
 Hero.prototype = new Entity();
 Hero.prototype.constructor = Hero;
 
-Hero.prototype.update = function () {	
-	this.movingUP = this.game.w;
-	this.movingLEFT = this.game.a;
-	this.movingDOWN = this.game.s;
-	this.movingRIGHT = this.game.d;
+Hero.prototype.update = function () {
+    this.movingUP = this.game.w;
+    this.movingLEFT = this.game.a;
+    this.movingDOWN = this.game.s;
+    this.movingRIGHT = this.game.d;
 
     Entity.prototype.update.call(this);
 }
@@ -408,10 +410,10 @@ Hero.prototype.update = function () {
 Hero.prototype.draw = function (ctx) {
     this.movingSpeed = 5;
 
-    
+
 
     if (this.movingUP) {
-        
+
         this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
     }
 
@@ -422,9 +424,9 @@ Hero.prototype.draw = function (ctx) {
             this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 0, 85, 60, 66, .1, 2, true, false);
             this.flag = 2;
         }
-        
+
     }
-    	
+
     if (this.movingDOWN) {
         if (this.flag === 3) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
@@ -432,11 +434,11 @@ Hero.prototype.draw = function (ctx) {
             this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 12, 0, 54, 66, .1, 4, true, false);
             this.flag = 3;
         }
-        
-        
-        
+
+
+
     }
-    	
+
     if (this.movingRIGHT) {
         if (this.flag === 4) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
@@ -444,25 +446,25 @@ Hero.prototype.draw = function (ctx) {
             this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 145, 85, 80, 66, .1, 2, true, false);
             this.flag = 4;
         }
-        
-        
+
+
     }
-        
-        
+
+
 
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
-    
+
     if (this.x > 668) { //hardcoded values bad. change later!
-    	this.x = -20;
-    } 
+        this.x = -20;
+    }
     if (this.x < -20) {
-    	this.x = 668;
+        this.x = 668;
     }
     if (this.y > 700) {
-    	this.y = -20;
+        this.y = -20;
     }
     if (this.y < -20) {
-    	this.y = 700;
+        this.y = 700;
     }
 }
 
