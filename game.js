@@ -239,7 +239,8 @@ GameEngine.prototype.addEntity = function (entity) {
 }
 
 GameEngine.prototype.draw = function (drawCallback) {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.ctx.clearRect(-this.ctx.canvas.width / 2, -this.ctx.canvas.height / 2, 
+    		this.ctx.canvas.width, this.ctx.canvas.height);
     this.ctx.save();
     for (var i = 0; i < this.entities.length; i++) {
         this.entities[i].draw(this.ctx);
@@ -331,8 +332,14 @@ Background.prototype.update = function () {
 }
 
 Background.prototype.draw = function (ctx) {
-    ctx.drawImage(ASSET_MANAGER.getAsset("./img/stats.png"), 700, 0, 200, 700);
-    ctx.drawImage(ASSET_MANAGER.getAsset("./img/castle.png"), 300, 300, 100, 100);
+	var castleImg = ASSET_MANAGER.getAsset("./img/castle.png");
+	var statsImg = ASSET_MANAGER.getAsset("./img/stats.png");
+	
+    ctx.drawImage(statsImg, 250, -350, 
+    		statsImg.width, statsImg.height);
+    
+    ctx.drawImage(castleImg, 0 - castleImg.width / 2 - statsImg.width / 2, 0 - castleImg.height / 2, 
+    		castleImg.width, castleImg.height);
 
     //ctx.fillStyle = "Black";
     //ctx.fillRect(700, 0, 200, 700);
@@ -340,21 +347,23 @@ Background.prototype.draw = function (ctx) {
 }
 
 function Bastardman(game) {
-    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/goomba.png"), 0, 0, 256, 256, 1, 1, true, false);
+	this.bastardmanImg = ASSET_MANAGER.getAsset("./img/goomba.png");
+    this.animation = new Animation(this.bastardmanImg, 0, 0, this.bastardmanImg.width, 
+    		this.bastardmanImg.height, 1, 1, true, false);
 
     var spawnWhere = Math.floor(Math.random() * 3);
     var randX;
     var randY;
 
     if (spawnWhere === 0) { //spawn on the top
-        randY = -256;
-        randX = Math.floor(Math.random() * 700);
+        randX = Math.floor(Math.random() * game.surfaceWidth) - game.surfaceWidth / 2 - 250;
+        randY = -this.bastardmanImg.height - game.surfaceHeight / 2;
     } else if (spawnWhere === 1) { //spawn on the left
-        randX = -256;
-        randY = Math.floor(Math.random() * 700);
+        randX = -this.bastardmanImg.width - game.surfaceWidth / 2;
+        randY = Math.floor(Math.random() * game.surfaceHeight) - game.surfaceHeight / 2;
     } else if (spawnWhere === 2) { //spawn on the bottom
-        randY = 700;
-        randX = Math.floor(Math.random() * 700);
+        randX = Math.floor(Math.random() * game.surfaceWidth) - game.surfaceWidth / 2 - 250;
+        randY = game.surfaceHeight / 2;
     }
 
     Entity.call(this, game, randX, randY);
@@ -368,15 +377,16 @@ Bastardman.prototype.update = function () {
 }
 
 Bastardman.prototype.draw = function (ctx) {
-    if (this.x > 225) {
+
+    if (this.x + this.bastardmanImg.width / 2 > 0 - 100) {
         this.x--;
-    } else if (this.x < 225) {
+    } else if (this.x + this.bastardmanImg.width / 2 < 0 - 100) {
         this.x++;
     }
 
-    if (this.y > 225) {
+    if (this.y + this.bastardmanImg.height / 2 > 0) {
         this.y--;
-    } else if (this.y < 225) {
+    } else if (this.y + this.bastardmanImg.height / 2 < 0) {
         this.y++;
     }
 
@@ -392,7 +402,7 @@ function Hero(game) {
     this.movingRIGHT = false;
     this.flag = 0;
 
-    Entity.call(this, game, 0, 400);
+    Entity.call(this, game, -game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0);
 }
 
 Hero.prototype = new Entity();
@@ -454,17 +464,17 @@ Hero.prototype.draw = function (ctx) {
 
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
 
-    if (this.x > 668) { //hardcoded values bad. change later!
-        this.x = -20;
+    if (this.x > this.game.surfaceWidth / 2 + this.animation.frameWidth + 1 - 300) { 
+        this.x = -this.game.surfaceWidth / 2 - this.animation.frameWidth;
     }
-    if (this.x < -20) {
-        this.x = 668;
+    if (this.x < -this.game.surfaceWidth / 2 - this.animation.frameWidth - 1) {
+        this.x = this.game.surfaceWidth / 2 + this.animation.frameWidth - 300;
     }
-    if (this.y > 700) {
-        this.y = -20;
+    if (this.y > this.game.surfaceHeight / 2 + 1) {
+        this.y = -this.game.surfaceHeight / 2 - this.animation.frameHeight / 2;
     }
-    if (this.y < -20) {
-        this.y = 700;
+    if (this.y < -this.game.surfaceHeight / 2 - this.animation.frameHeight / 2 - 1) {
+        this.y = this.game.surfaceHeight / 2;
     }
 }
 
@@ -482,8 +492,11 @@ ASSET_MANAGER.downloadAll(function () {
     console.log("starting up da sheild");
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
+    
+    ctx.translate(canvas.width/2, canvas.height/2);
 
     var gameEngine = new GameEngine();
+    gameEngine.init(ctx);
     var bg = new Background(gameEngine);
     var hero = new Hero(gameEngine);
     var bastardman = new Bastardman(gameEngine);
@@ -491,7 +504,6 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.addEntity(bg);
     gameEngine.addEntity(hero);
     gameEngine.addEntity(bastardman);
-
-    gameEngine.init(ctx);
+    
     gameEngine.start();
 });
