@@ -1,7 +1,5 @@
 // This game shell was happily copied from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
 
-// This game shell was happily copied from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
-
 window.requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
@@ -320,6 +318,18 @@ Entity.prototype.rotateAndCache = function (image, angle) {
 
 // GameBoard code below
 
+function BoundingBox(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+
+    this.left = x;
+    this.top = y;
+    this.right = this.left + width;
+    this.bottom = this.top + height;
+}
+
 function Background(game) {
     Entity.call(this, game, 0, 400);
 }
@@ -341,16 +351,36 @@ Background.prototype.draw = function (ctx) {
     ctx.drawImage(castleImg, 0 - castleImg.width / 2 - statsImg.width / 2, 0 - castleImg.height / 2, 
     		castleImg.width, castleImg.height);
 
-    //ctx.fillStyle = "Black";
-    //ctx.fillRect(700, 0, 200, 700);
 
+}
+
+function Tower(game) {
+    this.towerImg = ASSET_MANAGER.getAsset("./img/castle.png");
+    this.boundingbox = new BoundingBox(100, 100, this.towerImg.width, this.towerImg.height);
+}
+
+Tower.prototype = new Entity();
+Tower.prototype.constructor = Tower;
+
+Tower.prototype.update = function () {
+    Entity.prototype.update.call(this);
+}
+
+Tower.prototype.draw = function (ctx) {
+    if (true) {
+        ctx.beginPath();
+        ctx.strokeStyle = "green";
+        ctx.arc(this.x + this.towerImg.width / 2, this.y + this.towerImg.height / 2, 50, 0, Math.PI * 2, true);
+        ctx.stroke();
+        ctx.closePath();
+    }
 }
 
 function Bastardman(game) {
 	this.bastardmanImg = ASSET_MANAGER.getAsset("./img/goomba.png");
     this.animation = new Animation(this.bastardmanImg, 0, 0, this.bastardmanImg.width, 
     		this.bastardmanImg.height, 1, 1, true, false);
-
+ //   console.log(this.bastardmanImg.height + " " + this.bastardmanImg.width);
     var spawnWhere = Math.floor(Math.random() * 3);
     var randX;
     var randY;
@@ -365,6 +395,8 @@ function Bastardman(game) {
         randX = Math.floor(Math.random() * game.surfaceWidth) - game.surfaceWidth / 2 - 250;
         randY = game.surfaceHeight / 2;
     }
+
+    this.boundingbox = new BoundingBox(randX, randY, this.bastardmanImg.width, this.bastardmanImg.height);
 
     Entity.call(this, game, randX, randY);
 }
@@ -389,7 +421,14 @@ Bastardman.prototype.draw = function (ctx) {
     } else if (this.y + this.bastardmanImg.height / 2 < 0) {
         this.y++;
     }
-
+    console.log(this.game.showOutlines);
+    if (this.game.showOutlines) {
+        ctx.beginPath();
+        ctx.strokeStyle = "green";
+        ctx.arc(this.x + this.bastardmanImg.width/2, this.y + this.bastardmanImg.height/2, 13, 0, Math.PI * 2, true);
+        ctx.stroke();
+        ctx.closePath();
+    }
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
 }
 
@@ -500,10 +539,14 @@ ASSET_MANAGER.downloadAll(function () {
     var bg = new Background(gameEngine);
     var hero = new Hero(gameEngine);
     var bastardman = new Bastardman(gameEngine);
+    var tower = new Tower(gameEngine);
+
+    gameEngine.showOutlines = true;
 
     gameEngine.addEntity(bg);
     gameEngine.addEntity(hero);
     gameEngine.addEntity(bastardman);
-    
+    gameEngine.addEntity(tower);
+
     gameEngine.start();
 });
