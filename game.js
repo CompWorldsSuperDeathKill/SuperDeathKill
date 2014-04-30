@@ -1,5 +1,3 @@
-// This game shell was happily copied from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
-
 window.requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
@@ -130,6 +128,7 @@ function GameEngine() {
     this.w = null;
     this.surfaceWidth = null;
     this.surfaceHeight = null;
+    this.map= [];
 }
 
 GameEngine.prototype.init = function (ctx) {
@@ -151,7 +150,6 @@ GameEngine.prototype.start = function () {
 }
 
 GameEngine.prototype.startInput = function () {
-    var map = [];
 
     console.log('Starting input');
 
@@ -185,45 +183,12 @@ GameEngine.prototype.startInput = function () {
 
     this.ctx.canvas.addEventListener("keydown", function (e) {
 
-        map[e.keyCode] = true;
+        that.map[e.keyCode] = true;
 
-        for (var i = 0; i < 128; i++) {
-            if (map[87]) {
-                that.w = true;
-            }
-            if (map[65]) {
-                that.a = true;
-            }
-            if (map[83]) {
-                that.s = true;
-            }
-            if (map[68]) {
-                that.d = true;
-            }
-        }
-
-        e.preventDefault();
     }, false);
 
     this.ctx.canvas.addEventListener("keyup", function (e) {
-
-        map[e.keyCode] = false;
-
-        for (var i = 0; i < 128; i++) {
-            if (e.keyCode === 87) {
-                that.w = false;
-            }
-            if (e.keyCode === 65) {
-                that.a = false;
-            }
-            if (e.keyCode === 83) {
-                that.s = false;
-            }
-            if (e.keyCode === 68) {
-                that.d = false;
-            }
-        }
-        e.preventDefault();
+        that.map[e.keyCode] = false;
     }, false);
 
 
@@ -237,7 +202,7 @@ GameEngine.prototype.addEntity = function (entity) {
 }
 
 GameEngine.prototype.draw = function (drawCallback) {
-    this.ctx.clearRect(-this.ctx.canvas.width / 2, -this.ctx.canvas.height / 2, 
+    this.ctx.clearRect(-this.ctx.canvas.width / 2, -this.ctx.canvas.height / 2,
     		this.ctx.canvas.width, this.ctx.canvas.height);
     this.ctx.save();
     for (var i = 0; i < this.entities.length; i++) {
@@ -342,13 +307,13 @@ Background.prototype.update = function () {
 }
 
 Background.prototype.draw = function (ctx) {
-	var castleImg = ASSET_MANAGER.getAsset("./img/castle.png");
-	var statsImg = ASSET_MANAGER.getAsset("./img/stats.png");
-	
-    ctx.drawImage(statsImg, 250, -350, 
+    var castleImg = ASSET_MANAGER.getAsset("./img/castle.png");
+    var statsImg = ASSET_MANAGER.getAsset("./img/stats.png");
+
+    ctx.drawImage(statsImg, 250, -350,
     		statsImg.width, statsImg.height);
-    
-    ctx.drawImage(castleImg, 0 - castleImg.width / 2 - statsImg.width / 2, 0 - castleImg.height / 2, 
+
+    ctx.drawImage(castleImg, 0 - castleImg.width / 2 - statsImg.width / 2, 0 - castleImg.height / 2,
     		castleImg.width, castleImg.height);
 
 
@@ -377,10 +342,10 @@ Tower.prototype.draw = function (ctx) {
 }
 
 function Bastardman(game) {
-	this.bastardmanImg = ASSET_MANAGER.getAsset("./img/goomba.png");
-    this.animation = new Animation(this.bastardmanImg, 0, 0, this.bastardmanImg.width, 
+    this.bastardmanImg = ASSET_MANAGER.getAsset("./img/goomba.png");
+    this.animation = new Animation(this.bastardmanImg, 0, 0, this.bastardmanImg.width,
     		this.bastardmanImg.height, 1, 1, true, false);
- //   console.log(this.bastardmanImg.height + " " + this.bastardmanImg.width);
+    //   console.log(this.bastardmanImg.height + " " + this.bastardmanImg.width);
     var spawnWhere = Math.floor(Math.random() * 3);
     var randX;
     var randY;
@@ -425,7 +390,7 @@ Bastardman.prototype.draw = function (ctx) {
     if (this.game.showOutlines) {
         ctx.beginPath();
         ctx.strokeStyle = "green";
-        ctx.arc(this.x + this.bastardmanImg.width/2, this.y + this.bastardmanImg.height/2, 13, 0, Math.PI * 2, true);
+        ctx.arc(this.x + this.bastardmanImg.width / 2, this.y + this.bastardmanImg.height / 2, 13, 0, Math.PI * 2, true);
         ctx.stroke();
         ctx.closePath();
     }
@@ -434,11 +399,12 @@ Bastardman.prototype.draw = function (ctx) {
 
 
 function Hero(game) {
-    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 12, 0, 54, 66, .1, 1, true, false);
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 0, 0, 102, 102, .1, 1, true, false);
     this.movingUP = false;
     this.movingLEFT = false;
     this.movingDOWN = false;
     this.movingRIGHT = false;
+    this.movingRIGHTDOWN = false;
     this.flag = 0;
 
     Entity.call(this, game, -game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0);
@@ -452,6 +418,7 @@ Hero.prototype.update = function () {
     this.movingLEFT = this.game.a;
     this.movingDOWN = this.game.s;
     this.movingRIGHT = this.game.d;
+    this.movingRIGHTDOWN = this.game.sd;
 
     Entity.prototype.update.call(this);
 }
@@ -459,51 +426,65 @@ Hero.prototype.update = function () {
 Hero.prototype.draw = function (ctx) {
     this.movingSpeed = 5;
 
+    if (this.game.map["87"] && this.game.map["68"]) {
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y -= this.movingSpeed);
+    } 
 
-
-    if (this.movingUP) {
-
-        this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
+    else if (this.game.map["87"] && this.game.map["65"]) {
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y -= this.movingSpeed);
     }
 
-    if (this.movingLEFT) {
+    else if (this.game.map["83"] && this.game.map["68"]) {
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y += this.movingSpeed);
+    }
+
+    else if (this.game.map["83"] && this.game.map["65"]) {
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y += this.movingSpeed);
+    }
+
+    else if (this.game.map["87"]) {
+        if (this.flag === 1) {
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
+        } else {
+            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 901, 0, 102, 102, .1, 4, true, false);
+            this.flag = 1;
+        }  
+    }
+
+    else if (this.game.map["65"]) {
         if (this.flag === 2) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
         } else {
-            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 0, 85, 60, 66, .1, 2, true, false);
+            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 101, 0, 102, 102, .1, 2, true, false);
             this.flag = 2;
         }
 
     }
 
-    if (this.movingDOWN) {
+    else if (this.game.map["83"]) {
         if (this.flag === 3) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
         } else {
-            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 12, 0, 54, 66, .1, 4, true, false);
+            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 501, 0, 102, 102, .1, 4, true, false);
             this.flag = 3;
         }
-
-
-
     }
 
-    if (this.movingRIGHT) {
+    else if (this.game.map["68"]) {
         if (this.flag === 4) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
         } else {
-            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite_test.png"), 145, 85, 80, 66, .1, 2, true, false);
+            this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 301, 0, 102, 102, .1, 2, true, false);
             this.flag = 4;
         }
+    } 
 
-
-    }
-
+    
 
 
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
 
-    if (this.x > this.game.surfaceWidth / 2 + this.animation.frameWidth + 1 - 300) { 
+    if (this.x > this.game.surfaceWidth / 2 + this.animation.frameWidth + 1 - 300) {
         this.x = -this.game.surfaceWidth / 2 - this.animation.frameWidth;
     }
     if (this.x < -this.game.surfaceWidth / 2 - this.animation.frameWidth - 1) {
@@ -526,13 +507,14 @@ ASSET_MANAGER.queueDownload("./img/stats.png");
 ASSET_MANAGER.queueDownload("./img/castle.png");
 ASSET_MANAGER.queueDownload("./img/goomba.png");
 ASSET_MANAGER.queueDownload("./img/sprite_test.png");
+ASSET_MANAGER.queueDownload("./img/sprite.png");
 
 ASSET_MANAGER.downloadAll(function () {
     console.log("starting up da sheild");
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
-    
-    ctx.translate(canvas.width/2, canvas.height/2);
+
+    ctx.translate(canvas.width / 2, canvas.height / 2);
 
     var gameEngine = new GameEngine();
     gameEngine.init(ctx);
