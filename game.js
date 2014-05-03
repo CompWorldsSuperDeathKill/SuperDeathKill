@@ -397,6 +397,66 @@ Bastardman.prototype.draw = function (ctx) {
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
 }
 
+function Monster(game, image, imgWidth, imgHeight, interval,frames) {
+    this.bastardmanImg = ASSET_MANAGER.getAsset(image);
+    this.animation = new Animation(this.bastardmanImg, 0, 0, imgWidth,
+    		imgHeight, interval, frames, true, false);
+
+    this.bastardmanImgWidth= imgWidth;
+    this.bastardmanImgHeight = imgHeight;
+
+    //   console.log(this.bastardmanImg.height + " " + this.bastardmanImg.width);
+    var spawnWhere = Math.floor(Math.random() * 3);
+    var randX;
+    var randY;
+
+    if (spawnWhere === 0) { //spawn on the top
+        randX = Math.floor(Math.random() * game.surfaceWidth) - game.surfaceWidth / 2 - 250;
+        randY = -this.bastardmanImgHeight - game.surfaceHeight / 2;
+    } else if (spawnWhere === 1) { //spawn on the left
+        randX = -this.bastardmanImgWidth - game.surfaceWidth / 2;
+        randY = Math.floor(Math.random() * game.surfaceHeight) - game.surfaceHeight / 2;
+    } else if (spawnWhere === 2) { //spawn on the bottom
+        randX = Math.floor(Math.random() * game.surfaceWidth) - game.surfaceWidth / 2 - 250;
+        randY = game.surfaceHeight / 2;
+    }
+
+    this.boundingbox = new BoundingBox(randX, randY, this.bastardmanImgWidth, this.bastardmanImgHeight);
+
+    Entity.call(this, game, randX, randY);
+}
+
+Monster.prototype = new Entity();
+Monster.prototype.constructor = Bastardman;
+
+Monster.prototype.update = function () {
+    Entity.prototype.update.call(this);
+}
+
+Monster.prototype.draw = function (ctx) {
+
+    if (this.x + this.bastardmanImgWidth / 2 > 0 - 100) {
+        this.x--;
+    } else if (this.x + this.bastardmanImgWidth / 2 < 0 - 100) {
+        this.x++;
+    }
+
+    if (this.y + this.bastardmanImgHeight / 2 > 0) {
+        this.y--;
+    } else if (this.y + this.bastardmanImgHeight / 2 < 0) {
+        this.y++;
+    }
+    console.log(this.game.showOutlines);
+    if (this.game.showOutlines) {
+        ctx.beginPath();
+        ctx.strokeStyle = "green";
+        ctx.arc(this.x + this.bastardmanImgWidth / 2, this.y + this.bastardmanImgHeight / 2, 13, 0, Math.PI * 2, true);
+        ctx.stroke();
+        ctx.closePath();
+    }
+    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+}
+
 
 function Hero(game) {
     this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 0, 0, 102, 102, .1, 1, true, false);
@@ -425,7 +485,7 @@ Hero.prototype.update = function () {
 
 Hero.prototype.draw = function (ctx) {
     this.movingSpeed = 5;
-
+    
     if (this.game.map["87"] && this.game.map["68"]) {
         this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y -= this.movingSpeed);
     } 
@@ -508,6 +568,7 @@ ASSET_MANAGER.queueDownload("./img/castle.png");
 ASSET_MANAGER.queueDownload("./img/goomba.png");
 ASSET_MANAGER.queueDownload("./img/sprite_test.png");
 ASSET_MANAGER.queueDownload("./img/sprite.png");
+ASSET_MANAGER.queueDownload("./img/monster_poring.png");
 
 ASSET_MANAGER.downloadAll(function () {
     console.log("starting up da sheild");
@@ -520,14 +581,20 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.init(ctx);
     var bg = new Background(gameEngine);
     var hero = new Hero(gameEngine);
-    var bastardman = new Bastardman(gameEngine);
     var tower = new Tower(gameEngine);
+
+    for (var i = 0; i < 10; i++) {
+        gameEngine.addEntity(new Bastardman(gameEngine));
+    }
+
+    for (var i = 0; i < 10; i++) {
+        gameEngine.addEntity(new Monster(gameEngine, "./img/monster_poring.png", 57.5, 35, .1, 8));
+    }
 
     gameEngine.showOutlines = true;
 
     gameEngine.addEntity(bg);
     gameEngine.addEntity(hero);
-    gameEngine.addEntity(bastardman);
     gameEngine.addEntity(tower);
 
     gameEngine.start();
