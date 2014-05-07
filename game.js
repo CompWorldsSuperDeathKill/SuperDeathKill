@@ -571,13 +571,9 @@ Hero.prototype.draw = function (ctx) {
 
 var ASSET_MANAGER = new AssetManager();
 
-ASSET_MANAGER.queueDownload("./img/test_hero.png");
 ASSET_MANAGER.queueDownload("./img/stats.png");
 ASSET_MANAGER.queueDownload("./img/castle.png");
-ASSET_MANAGER.queueDownload("./img/goomba.png");
-ASSET_MANAGER.queueDownload("./img/sprite_test.png");
 ASSET_MANAGER.queueDownload("./img/sprite.png");
-ASSET_MANAGER.queueDownload("./img/monster_poring.png");
 ASSET_MANAGER.queueDownload("./img/monster_sprite.png");
 
 ASSET_MANAGER.downloadAll(function () {
