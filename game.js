@@ -143,10 +143,30 @@ GameEngine.prototype.init = function (ctx) {
 GameEngine.prototype.start = function () {
     console.log("starting game");
     var that = this;
+    
+    //spawn one enemy, useful for debugging if you drop the spawn rate
+	var temp = new Monster(this, "./img/monster_sprite.png", 104.4, 0, 52.2, 50, .5, 2)
+    this.addEntity(temp);
+    this.enemies.push(temp);
+    this.spawnCounter = 0;
+    
+    
     (function gameLoop() {
         that.loop();
+        that.spawnEnemy();
         requestAnimFrame(gameLoop, that.ctx.canvas);
     })();
+}
+
+GameEngine.prototype.spawnEnemy = function () {
+	this.spawnCounter += this.timer.tick() * this.spawnRate;
+
+	if (Math.floor(this.spawnCounter) === 1) {
+		var temp = new Monster(this, "./img/monster_sprite.png", 104.4, 0, 52.2, 50, .5, 2)
+	    this.addEntity(temp);
+	    this.enemies.push(temp);
+	    this.spawnCounter = 0;
+	}
 }
 
 GameEngine.prototype.startInput = function () {
@@ -224,8 +244,6 @@ GameEngine.prototype.update = function () {
             entity.update();
         }
     }
-
-    console.log("sup");
 
     for (var i = this.entities.length - 1; i >= 0; --i) {
         if (this.entities[i].removeFromWorld) {
@@ -326,26 +344,64 @@ Background.prototype.draw = function (ctx) {
 
 function Tower(game) {
     this.towerImg = ASSET_MANAGER.getAsset("./img/castle.png");
-    this.boundingBox = new BoundingBox(-100, 0, this.towerImg.width / 3);
+    this.boundingBox = new BoundingBox(0, 0, this.towerImg.width / 3);
+    this.rangeBox = new BoundingBox(0, 0, this.towerImg.width);
+    this.chargingPower = 0;
 
-    Entity.call(this, game, 100, 100);
+    Entity.call(this, game, 0, 0);
 }
 
 Tower.prototype = new Entity();
 Tower.prototype.constructor = Tower;
 
 Tower.prototype.update = function () {
+    if (this.chargingPower !== 100) {
+    	this.chargingPower += 1;
+    }
+    
+    if (this.chargingPower === 100) {
+	    for (var i = 0; i < this.game.enemies.length; i++) {
+	        if (!this.game.enemies[i].dead && this.rangeBox.collide(this.game.enemies[i].boundingBox)) {
+	            this.game.enemies[i].dead = true;
+	            this.test = this.game.enemies[i];
+	            this.game.score += this.game.enemies[i].pointValue;
+	            this.game.scoreDisplay.innerHTML = "Score: " + this.game.score;
+	            this.chargingPower = 0;
+	            break;
+	        }
+	    }
+    }
+    
+	
     Entity.prototype.update.call(this);
 }
 
 Tower.prototype.draw = function (ctx) {
-    ctx.drawImage(this.towerImg, 0 - this.towerImg.width / 2 - 100, 0 - this.towerImg.height / 2,
+    ctx.drawImage(this.towerImg, 0 - this.towerImg.width / 2, 0 - this.towerImg.height / 2,
 		    		this.towerImg.width, this.towerImg.height);
+    
+    ctx.beginPath();
+    ctx.strokeStyle = "blue"
+    ctx.rect(-53, 75, 102, 5);
+    ctx.stroke();
+    ctx.closePath();
+    
+    ctx.beginPath();
+    ctx.fillStyle = "#FFFFFF"
+    ctx.rect(-52, 75 + 1, this.chargingPower, 5 - 2);
+    ctx.fill();
+    ctx.closePath();
 
     if (this.game.showOutlines) {
         ctx.beginPath();
         ctx.strokeStyle = "green";
-        ctx.arc(-100, 0, this.towerImg.width / 3, 0, Math.PI * 2, true);
+        ctx.arc(0, 0, this.towerImg.width / 3, 0, Math.PI * 2, true);
+        ctx.stroke();
+        ctx.closePath();
+        
+        ctx.beginPath();
+        ctx.strokeStyle = "red";
+        ctx.arc(0, 0, this.towerImg.width, 0, Math.PI * 2, true);
         ctx.stroke();
         ctx.closePath();
     }
@@ -360,6 +416,7 @@ function Monster(game, image, xOrigin, yOrigin, imgWidth, imgHeight, interval, f
     this.monsterImgWidth = imgWidth;
     this.monsterImgHeight = imgHeight;
     this.dead = false;
+    this.pointValue = 10;
 
     //   console.log(this.bastardmanImg.height + " " + this.bastardmanImg.width);
     var spawnWhere = Math.floor(Math.random() * 3);
@@ -388,16 +445,15 @@ Monster.prototype.constructor = Monster;
 Monster.prototype.update = function () {
     if (this.dead) {
         this.removeFromWorld = true;
-        this.game.score += 10;
     }
     Entity.prototype.update.call(this);
 }
 
 Monster.prototype.draw = function (ctx) {
     if (!this.boundingBox.collide(this.game.tower.boundingBox)) {
-        if (this.x + this.monsterImgWidth / 2 > 0 - 100) {
+        if (this.x + this.monsterImgWidth / 2 > 0 ) {
             this.x--;
-        } else if (this.x + this.monsterImgWidth / 2 < 0 - 100) {
+        } else if (this.x + this.monsterImgWidth / 2 < 0) {
             this.x++;
         }
 
@@ -526,8 +582,9 @@ Hero.prototype.draw = function (ctx) {
     }
 
     for (var i = 0; i < this.game.enemies.length; i++) {
-        if (this.boundingBox.collide(this.game.enemies[i].boundingBox)) {
+        if (!this.game.enemies[i].dead && this.boundingBox.collide(this.game.enemies[i].boundingBox)) {
             this.game.enemies[i].dead = true;
+            this.game.score += this.game.enemies[i].pointValue;
             this.game.scoreDisplay.innerHTML = "Score: " + this.game.score;
         }
     }
@@ -591,16 +648,6 @@ ASSET_MANAGER.downloadAll(function () {
     var hero = new Hero(gameEngine);
     var tower = new Tower(gameEngine);
 
-    for (var i = 0; i < 10; i++) {
-        //gameEngine.addEntity(new Bastardman(gameEngine));
-    }
-
-    for (var i = 0; i < 10; i++) {
-        var temp = new Monster(gameEngine, "./img/monster_sprite.png", 104.4, 0, 52.2, 50, .5, 2)
-        gameEngine.addEntity(temp);
-        enemies.push(temp);
-    }
-
     gameEngine.showOutlines = true;
 
     gameEngine.addEntity(bg);
@@ -611,6 +658,8 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.score = 0;
     gameEngine.tower = tower;
     gameEngine.enemies = enemies;
+    gameEngine.spawnRate = 50;
+    gameEngine.spawnCounter = 0;
 
     gameEngine.start();
 });
