@@ -211,8 +211,6 @@ GameEngine.prototype.startInput = function () {
         that.map[e.keyCode] = false;
     }, false);
 
-
-
     console.log('Input started');
 }
 
@@ -315,7 +313,6 @@ BoundingBox.prototype.collide = function (oth) {
     } else {
         return false;
     }
-
 }
 
 function Background(game) {
@@ -356,7 +353,7 @@ Tower.prototype.constructor = Tower;
 
 Tower.prototype.update = function () {
     if (this.chargingPower !== 100) {
-    	this.chargingPower += 1;
+    	this.chargingPower += 2;
     }
     
     if (this.chargingPower === 100) {
@@ -364,8 +361,10 @@ Tower.prototype.update = function () {
 	        if (!this.game.enemies[i].dead && this.rangeBox.collide(this.game.enemies[i].boundingBox)) {
 	            this.game.enemies[i].dead = true;
 	            this.test = this.game.enemies[i];
-	            this.game.score += this.game.enemies[i].pointValue;
-	            this.game.scoreDisplay.innerHTML = "Score: " + this.game.score;
+	            this.game.gold += this.game.enemies[i].pointValue;
+	            this.game.scoreDisplay.innerHTML = "Gold: " + this.game.gold;
+				this.game.kp += this.game.enemies[i].pointValue * 100 / 5;
+				this.game.kpDisplay.innerHTML = "Kill Points: " + this.game.kp;
 	            this.chargingPower = 0;
 	            break;
 	        }
@@ -419,20 +418,161 @@ function Monster(game, image, xOrigin, yOrigin, imgWidth, imgHeight, interval, f
     this.pointValue = 10;
 
     //   console.log(this.bastardmanImg.height + " " + this.bastardmanImg.width);
-    var spawnWhere = Math.floor(Math.random() * 3);
+    var spawnWhere = Math.floor(Math.random() * 50);
     var randX;
     var randY;
-
-    if (spawnWhere === 0) { //spawn on the top
-        randX = Math.floor(Math.random() * game.surfaceWidth) - game.surfaceWidth / 2 - 250;
-        randY = -this.monsterImgHeight - game.surfaceHeight / 2;
-    } else if (spawnWhere === 1) { //spawn on the left
-        randX = -this.monsterImgWidth - game.surfaceWidth / 2;
-        randY = Math.floor(Math.random() * game.surfaceHeight) - game.surfaceHeight / 2;
-    } else if (spawnWhere === 2) { //spawn on the bottom
-        randX = Math.floor(Math.random() * game.surfaceWidth) - game.surfaceWidth / 2 - 250;
-        randY = game.surfaceHeight / 2;
-    }
+	
+	if (spawnWhere === 0) { //spawn from the top
+		randX = -500;
+		randY = -400;
+	} else if (spawnWhere === 1) {
+		randX = -427;
+		randY = -400;
+	} else if (spawnWhere === 2) {
+		randX = -354;
+		randY = -400;
+	} else if (spawnWhere === 3) {
+		randX = -281;
+		randY = -400;
+	} else if (spawnWhere === 4) {
+		randX = -208;
+		randY = -400;
+	} else if (spawnWhere === 5) {
+		randX = -135;
+		randY = -400;
+	} else if (spawnWhere === 6) {
+		randX = -62;
+		randY = -400;
+	} else if (spawnWhere === 7) {
+		randX = 11;
+		randY = -400;
+	} else if (spawnWhere === 8) {
+		randX = 84;
+		randY = -400;
+	} else if (spawnWhere === 9) {
+		randX = 157;
+		randY = -400;
+	} else if (spawnWhere === 10) {
+		randX = 230;
+		randY = -400;
+	} else if (spawnWhere === 11) {
+		randX = 303;
+		randY = -400;
+	} else if (spawnWhere === 12) {
+		randX = 376;
+		randY = -400;
+	} else if (spawnWhere === 13) { //spawn from the right
+		randX = 450;
+		randY = -335;
+	} else if (spawnWhere === 14) {
+		randX = 450;
+		randY = -271;
+	} else if (spawnWhere === 15) {
+		randX = 450;
+		randY = -206;
+	} else if (spawnWhere === 16) {
+		randX = 450;
+		randY = -142;
+	} else if (spawnWhere === 17) {
+		randX = 450;
+		randY = -77;
+	} else if (spawnWhere === 18) {
+		randX = 450;
+		randY = -13;
+	} else if (spawnWhere === 19) {
+		randX = 450;
+		randY = 51;
+	} else if (spawnWhere === 20) {
+		randX = 450;
+		randY = 116;
+	} else if (spawnWhere === 21) {
+		randX = 450;
+		randY = 180;
+	} else if (spawnWhere === 22) {
+		randX = 450;
+		randY = 245;
+	} else if (spawnWhere === 23) {
+		randX = 450;
+		randY = 309;
+	} else if (spawnWhere === 24) {
+		randX = 450;
+		randY = 373;
+	} else if (spawnWhere === 25) {
+		randX = 450;
+		randY = 400;
+	} else if (spawnWhere === 26) { //spawn from the bottom
+		randX = 377;
+		randY = 400;
+	} else if (spawnWhere === 27) {
+		randX = 304;
+		randY = 400;
+	} else if (spawnWhere === 28) {
+		randX = 231;
+		randY = 400;
+	} else if (spawnWhere === 29) {
+		randX = 158;
+		randY = 400;
+	} else if (spawnWhere === 30) {
+		randX = 85;
+		randY = 400;
+	} else if (spawnWhere === 31) {
+		randX = 12;
+		randY = 400;
+	} else if (spawnWhere === 32) {
+		randX = -61;
+		randY = 400;
+	} else if (spawnWhere === 33) {
+		randX = -134;
+		randY = 400;
+	} else if (spawnWhere === 34) {
+		randX = -207;
+		randY = 400;
+	} else if (spawnWhere === 35) {
+		randX = -280;
+		randY = 400;
+	} else if (spawnWhere === 36) {
+		randX = -353;
+		randY = 400;
+	} else if (spawnWhere === 37) {
+		randX = -426;
+		randY = 400;
+	} else if (spawnWhere === 38) {
+		randX = -500;
+		randY = 400;
+	} else if (spawnWhere === 39) { // spawn from left
+		randX = -500;
+		randY = 327;
+	} else if (spawnWhere === 40) {
+		randX = -500;
+		randY = 254;
+	} else if (spawnWhere === 41) {
+		randX = -500;
+		randY = 181;
+	} else if (spawnWhere === 42) {
+		randX = -500;
+		randY = 108;
+	} else if (spawnWhere === 43) {
+		randX = -500;
+		randY = 35;
+	} else if (spawnWhere === 44) {
+		randX = -500;
+		randY = -38;
+	} else if (spawnWhere === 45) {
+		randX = -500;
+		randY = -111;
+	} else if (spawnWhere === 46) {
+		randX = -500;
+		randY = -184;
+	} else if (spawnWhere === 47) {
+		randX = -500;
+		randY = -257;
+	} else if (spawnWhere === 48) {
+		randX = -500;
+		randY = -330;
+	} else if (spawnWhere === 49) {
+		randX = -500;
+		randY = -400;
+	}
 
     this.boundingBox = new BoundingBox(randX, randY, 13);
 
@@ -487,7 +627,7 @@ function Hero(game) {
 
     this.boundingBox = new BoundingBox(-game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0, 13);
 
-    Entity.call(this, game, -game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0);
+    Entity.call(this, game, -55, 80);
 }
 
 Hero.prototype = new Entity();
@@ -584,19 +724,21 @@ Hero.prototype.draw = function (ctx) {
     for (var i = 0; i < this.game.enemies.length; i++) {
         if (!this.game.enemies[i].dead && this.boundingBox.collide(this.game.enemies[i].boundingBox)) {
             this.game.enemies[i].dead = true;
-            this.game.score += this.game.enemies[i].pointValue;
-            this.game.scoreDisplay.innerHTML = "Score: " + this.game.score;
+            this.game.gold += this.game.enemies[i].pointValue;
+            this.game.scoreDisplay.innerHTML = "Gold: " + this.game.gold;
+			this.game.kp += this.game.enemies[i].pointValue * 100;
+			this.game.kpDisplay.innerHTML = "Kill Points: " + this.game.kp;
         }
     }
 
 
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
 
-    if (this.x > this.game.surfaceWidth / 2 + this.animation.frameWidth + 1 - 300) {
+    if (this.x > this.game.surfaceWidth / 2 + this.animation.frameWidth + 1 - 150) {
         this.x = -this.game.surfaceWidth / 2 - this.animation.frameWidth;
     }
     if (this.x < -this.game.surfaceWidth / 2 - this.animation.frameWidth - 1) {
-        this.x = this.game.surfaceWidth / 2 + this.animation.frameWidth - 300;
+        this.x = this.game.surfaceWidth / 2 + this.animation.frameWidth - 150;
     }
     if (this.y > this.game.surfaceHeight / 2 + 1) {
         this.y = -this.game.surfaceHeight / 2 - this.animation.frameHeight / 2;
@@ -637,8 +779,9 @@ ASSET_MANAGER.downloadAll(function () {
     console.log("starting up da sheild");
     var canvas = document.getElementById('gameWorld');
     var ctx = canvas.getContext('2d');
-    var score = document.getElementById('score');
-
+    var gold = document.getElementById('gold');
+	var kp = document.getElementById('kp');
+	
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
     var enemies = [];
@@ -654,8 +797,10 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.addEntity(hero);
     gameEngine.addEntity(tower);
 
-    gameEngine.scoreDisplay = score;
-    gameEngine.score = 0;
+    gameEngine.scoreDisplay = gold;
+    gameEngine.gold = 0;
+	gameEngine.kpDisplay = kp;
+	gameEngine.kp = 0;
     gameEngine.tower = tower;
     gameEngine.enemies = enemies;
     gameEngine.spawnRate = 50;
