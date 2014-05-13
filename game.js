@@ -162,10 +162,29 @@ GameEngine.prototype.spawnEnemy = function () {
 	this.spawnCounter += this.timer.tick() * this.spawnRate;
 
 	if (Math.floor(this.spawnCounter) === 1) {
-		var temp = new Monster(this, "./img/monster_sprite.png", 104.4, 0, 52.2, 50, .5, 2)
-	    this.addEntity(temp);
-	    this.enemies.push(temp);
-	    this.spawnCounter = 0;
+	    this.random_number = Math.floor(Math.random() * 50);
+
+	    if (this.random_number <= 12) { // Top
+	        var temp = new Monster(this, "./img/monster_sprite.png", 104.4, 0, 52.2, 50, .5, 2, this.random_number)
+	        this.addEntity(temp);
+	        this.enemies.push(temp);
+	        this.spawnCounter = 0;
+	    } else if (this.random_number > 12 && this.random_number <= 25) { // right
+	        var temp = new Monster(this, "./img/monster_sprite.png", 208.8, 0, 52.2, 50, .5, 3, this.random_number)
+	        this.addEntity(temp);
+	        this.enemies.push(temp);
+	        this.spawnCounter = 0;
+	    } else if (this.random_number > 25 && this.random_number <= 38) { // Bottom
+	        var temp = new Monster(this, "./img/monster_sprite.png", 0, 0, 52.2, 50, .5, 2, this.random_number)
+	        this.addEntity(temp);
+	        this.enemies.push(temp);
+	        this.spawnCounter = 0;
+	    } else {    // Right
+	        var temp = new Monster(this, "./img/monster_sprite.png", 365.4, 0, 52.2, 50, .5, 3, this.random_number)
+	        this.addEntity(temp);
+	        this.enemies.push(temp);
+	        this.spawnCounter = 0;
+	    }
 	}
 }
 
@@ -407,7 +426,7 @@ Tower.prototype.draw = function (ctx) {
 }
 
 
-function Monster(game, image, xOrigin, yOrigin, imgWidth, imgHeight, interval, frames) {
+function Monster(game, image, xOrigin, yOrigin, imgWidth, imgHeight, interval, frames, spawn_position) {
     this.monsterImg = ASSET_MANAGER.getAsset(image);
     this.animation = new Animation(this.monsterImg, xOrigin, yOrigin, imgWidth,
     		imgHeight, interval, frames, true, false);
@@ -418,7 +437,7 @@ function Monster(game, image, xOrigin, yOrigin, imgWidth, imgHeight, interval, f
     this.pointValue = 10;
 
     //   console.log(this.bastardmanImg.height + " " + this.bastardmanImg.width);
-    var spawnWhere = Math.floor(Math.random() * 50);
+    var spawnWhere = spawn_position;
     var randX;
     var randY;
 	
