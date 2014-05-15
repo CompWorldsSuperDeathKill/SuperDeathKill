@@ -858,4 +858,6 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.dead = false;
    
     gameEngine.start();
+    
+    //s
 });
