@@ -207,7 +207,8 @@ GameEngine.prototype.startInput = function () {
     var that = this;
 
     this.ctx.canvas.addEventListener("click", function (e) {
-        that.click = true;
+        that.running = true;
+        that.introText.innerHTML = "";
     }, false);
 
     this.ctx.canvas.addEventListener("mousemove", function (e) {
@@ -239,6 +240,8 @@ GameEngine.prototype.addEntity = function (entity) {
 }
 
 GameEngine.prototype.draw = function (drawCallback) {
+	if (!this.running) return;
+	
     this.ctx.clearRect(-this.ctx.canvas.width / 2, -this.ctx.canvas.height / 2,
     		this.ctx.canvas.width, this.ctx.canvas.height);
     this.ctx.save();
@@ -252,6 +255,11 @@ GameEngine.prototype.draw = function (drawCallback) {
 }
 
 GameEngine.prototype.update = function () {
+	if (!this.running) return;
+	if (this.dead) {
+		this.gameOver();
+	}
+	
     var entitiesCount = this.entities.length;
 
     for (var i = 0; i < entitiesCount; i++) {
@@ -267,6 +275,12 @@ GameEngine.prototype.update = function () {
             this.entities.splice(i, 1);
         }
     }
+}
+
+GameEngine.prototype.gameOver = function () {
+	this.towerHpDisplay.innerHTML = "You have failed.";
+	this.entities = {};
+	this.enemies = {};
 }
 
 GameEngine.prototype.loop = function () {
@@ -346,15 +360,6 @@ Background.prototype.update = function () {
 }
 
 Background.prototype.draw = function (ctx) {
-    // var castleImg = ASSET_MANAGER.getAsset("./img/castle.png");
-    //var statsImg = ASSET_MANAGER.getAsset("./img/stats.png");
-
-    //ctx.drawImage(statsImg, 250, -350,
-    //statsImg.width, statsImg.height);
-
-    //ctx.drawImage(castleImg, 0 - castleImg.width / 2 - statsImg.width / 2, 0 - castleImg.height / 2,
-    //		castleImg.width, castleImg.height);
-
 
 }
 
@@ -394,9 +399,14 @@ Tower.prototype.update = function () {
     for (var i = 0; i < this.game.enemies.length; i++) {
         if (!this.game.enemies[i].dead && this.boundingBox.collide(this.game.enemies[i].boundingBox)) {
             this.game.enemies[i].dead = true;
+            this.game.enemies[i].boundingBox = null;
             this.game.towerHp -= 1;
             this.game.towerHpDisplay.innerHTML = "Tower Health: " + this.game.towerHp;
         }
+    }
+    
+    if (this.game.towerHp <= 0) {
+    	this.game.dead = true;
     }
 
     
@@ -405,6 +415,8 @@ Tower.prototype.update = function () {
 }
 
 Tower.prototype.draw = function (ctx) {
+	if (this.game.dead) return;
+	
     ctx.drawImage(this.towerImg, 0 - this.towerImg.width / 2, 0 - this.towerImg.height / 2,
 		    		this.towerImg.width, this.towerImg.height);
     
@@ -810,6 +822,9 @@ ASSET_MANAGER.downloadAll(function () {
     var ctx = canvas.getContext('2d');
     var gold = document.getElementById('gold');
 	var kp = document.getElementById('kp');
+	var introText = document.getElementById('introText');
+	var towerHealth = document.getElementById('towerHealth');
+	var gameOverText = document.getElementById('gameOverText');
 	
     ctx.translate(canvas.width / 2, canvas.height / 2);
 
@@ -833,10 +848,14 @@ ASSET_MANAGER.downloadAll(function () {
 	gameEngine.kp = 0;
     gameEngine.tower = tower;
     gameEngine.enemies = enemies;
-    gameEngine.spawnRate = 50;
+    gameEngine.spawnRate = 250;
     gameEngine.spawnCounter = 0;
     gameEngine.towerHp = 100;
     gameEngine.towerHpDisplay = towerHealth;
-
+    gameEngine.introText = introText;
+    gameEngine.gameOverText = gameOverText;
+    gameEngine.running = false;
+    gameEngine.dead = false;
+   
     gameEngine.start();
 });
