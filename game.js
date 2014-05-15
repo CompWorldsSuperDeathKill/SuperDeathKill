@@ -389,6 +389,16 @@ Tower.prototype.update = function () {
 	        }
 	    }
     }
+
+
+    for (var i = 0; i < this.game.enemies.length; i++) {
+        if (!this.game.enemies[i].dead && this.boundingBox.collide(this.game.enemies[i].boundingBox)) {
+            this.game.enemies[i].dead = true;
+            this.game.towerHp -= 1;
+            this.game.towerHpDisplay.innerHTML = "Tower Health: " + this.game.towerHp;
+        }
+    }
+
     
 	
     Entity.prototype.update.call(this);
@@ -816,6 +826,7 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.addEntity(hero);
     gameEngine.addEntity(tower);
 
+    
     gameEngine.scoreDisplay = gold;
     gameEngine.gold = 0;
 	gameEngine.kpDisplay = kp;
@@ -824,6 +835,8 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.enemies = enemies;
     gameEngine.spawnRate = 50;
     gameEngine.spawnCounter = 0;
+    gameEngine.towerHp = 100;
+    gameEngine.towerHpDisplay = towerHealth;
 
     gameEngine.start();
 });
