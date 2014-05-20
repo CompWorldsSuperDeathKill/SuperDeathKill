@@ -364,11 +364,12 @@ Background.prototype.draw = function (ctx) {
 }
 
 function Tower(game) {
+	this.towerRange = 100;
     this.towerImg = ASSET_MANAGER.getAsset("./img/castle.png");
     this.boundingBox = new BoundingBox(0, 0, this.towerImg.width / 3);
-    this.rangeBox = new BoundingBox(0, 0, this.towerImg.width);
+    this.rangeBox = new BoundingBox(0, 0, this.towerRange);
     this.chargingPower = 0;
-
+	
     Entity.call(this, game, 0, 0);
 }
 
@@ -376,11 +377,11 @@ Tower.prototype = new Entity();
 Tower.prototype.constructor = Tower;
 
 Tower.prototype.update = function () {
-    if (this.chargingPower !== 100) {
-    	this.chargingPower += 2;
+    if (this.chargingPower <= 100) {
+    	this.chargingPower += 1.3;	//change this to change the rate at which the tower attacks.
     }
     
-    if (this.chargingPower === 100) {
+    if (this.chargingPower >= 100) {
 	    for (var i = 0; i < this.game.enemies.length; i++) {
 	        if (!this.game.enemies[i].dead && this.rangeBox.collide(this.game.enemies[i].boundingBox)) {
 	            this.game.enemies[i].dead = true;
@@ -400,7 +401,7 @@ Tower.prototype.update = function () {
         if (!this.game.enemies[i].dead && this.boundingBox.collide(this.game.enemies[i].boundingBox)) {
             this.game.enemies[i].dead = true;
             this.game.enemies[i].boundingBox = null;
-            this.game.towerHp -= 1;
+            this.game.towerHp -= 10;
             this.game.towerHpDisplay.innerHTML = "Tower Health: " + this.game.towerHp;
         }
     }
@@ -415,6 +416,7 @@ Tower.prototype.update = function () {
 }
 
 Tower.prototype.draw = function (ctx) {
+
 	if (this.game.dead) return;
 	
     ctx.drawImage(this.towerImg, 0 - this.towerImg.width / 2, 0 - this.towerImg.height / 2,
@@ -441,7 +443,7 @@ Tower.prototype.draw = function (ctx) {
         
         ctx.beginPath();
         ctx.strokeStyle = "red";
-        ctx.arc(0, 0, this.towerImg.width, 0, Math.PI * 2, true);
+        ctx.arc(0, 0, this.towerRange, 0, Math.PI * 2, true);
         ctx.stroke();
         ctx.closePath();
     }
@@ -458,7 +460,6 @@ function Monster(game, image, xOrigin, yOrigin, imgWidth, imgHeight, interval, f
     this.dead = false;
     this.pointValue = 10;
 
-    //   console.log(this.bastardmanImg.height + " " + this.bastardmanImg.width);
     var spawnWhere = spawn_position;
     var randX;
     var randY;
@@ -632,7 +633,21 @@ Monster.prototype.update = function () {
 
 Monster.prototype.draw = function (ctx) {
     if (!this.boundingBox.collide(this.game.tower.boundingBox)) {
-        if (this.x + this.monsterImgWidth / 2 > 0 ) {
+		var enemySpeed = .008;
+		if (this.x + this.monsterImgWidth / 2 > 0 ) {
+            this.x = this.x - (this.x * enemySpeed);
+        } else if (this.x + this.monsterImgWidth / 2 < 0) {
+            this.x = this.x - (this.x * enemySpeed);
+        }
+
+        if (this.y + this.monsterImgHeight / 2 > 0) {
+            this.y = this.y - (this.y * enemySpeed);
+        } else if (this.y + this.monsterImgHeight / 2 < 0) {
+            this.y = this.y - (this.y * enemySpeed);
+        }
+		/*
+		
+		if (this.x + this.monsterImgWidth / 2 > 0 ) {
             this.x--;
         } else if (this.x + this.monsterImgWidth / 2 < 0) {
             this.x++;
@@ -643,17 +658,18 @@ Monster.prototype.draw = function (ctx) {
         } else if (this.y + this.monsterImgHeight / 2 < 0) {
             this.y++;
         }
-    }
+*/
+  }
 
     if (this.game.showOutlines) {
         ctx.beginPath();
         ctx.strokeStyle = "green";
-        ctx.arc(this.x + this.monsterImgWidth / 2, this.y + this.monsterImgHeight / 2, 13, 0, Math.PI * 2, true);
+        ctx.arc(this.x + this.monsterImgWidth / 2, this.y + this.monsterImgHeight / 2, 17, 0, Math.PI * 2, true);
         ctx.stroke();
         ctx.closePath();
     }
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
-    this.boundingBox = new BoundingBox(this.x + this.monsterImgWidth / 2, this.y + this.monsterImgHeight / 2, 13);
+    this.boundingBox = new BoundingBox(this.x + this.monsterImgWidth / 2, this.y + this.monsterImgHeight / 2, 17);
 }
 
 
@@ -685,8 +701,7 @@ Hero.prototype.update = function () {
 }
 
 Hero.prototype.draw = function (ctx) {
-    this.movingSpeed = 5;
-    //console.log(this.boundingBox.collide(this.game.tower.boundingBox));
+    this.movingSpeed = 2.5;
     if (!this.boundingBox.collide(this.game.tower.boundingBox)) {
         if (this.game.map["87"] && this.game.map["68"]) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y -= this.movingSpeed);
@@ -720,7 +735,6 @@ Hero.prototype.draw = function (ctx) {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 101, 0, 102, 102, .1, 2, true, false);
                 this.flag = 2;
             }
-
         }
 
         else if (this.game.map["83"]) {
@@ -752,14 +766,16 @@ Hero.prototype.draw = function (ctx) {
 
     }
 
+	var heroBoundingBoxSize = 15;
+	
     if (this.flag === 1) {
-        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.5, this.y + this.animation.frameHeight / 5, 13);
+        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.5, this.y + this.animation.frameHeight / 5, heroBoundingBoxSize);
     } else if (this.flag === 2) {
-        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 4, this.y + this.animation.frameHeight / 2, 13);
+        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 4, this.y + this.animation.frameHeight / 2, heroBoundingBoxSize);
     } else if (this.flag === 3) {
-        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.65, this.y + this.animation.frameHeight / 1.35, 13);
+        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.65, this.y + this.animation.frameHeight / 1.35, heroBoundingBoxSize);
     } else if (this.flag === 4) {
-        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.25, this.y + this.animation.frameHeight / 2, 13);
+        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.25, this.y + this.animation.frameHeight / 2, heroBoundingBoxSize);
     }
 
     for (var i = 0; i < this.game.enemies.length; i++) {
@@ -771,7 +787,6 @@ Hero.prototype.draw = function (ctx) {
 			this.game.kpDisplay.innerHTML = "Kill Points: " + this.game.kp;
         }
     }
-
 
     this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
 
@@ -788,18 +803,20 @@ Hero.prototype.draw = function (ctx) {
         this.y = this.game.surfaceHeight / 2;
     }
 
+	
+	
     if (this.game.showOutlines) {
         ctx.beginPath();
         ctx.strokeStyle = "green";
 
         if (this.flag === 1) {
-            ctx.arc(this.x + this.animation.frameWidth / 1.5, this.y + this.animation.frameHeight / 5, 13, 0, Math.PI * 2, true);
+            ctx.arc(this.x + this.animation.frameWidth / 1.5, this.y + this.animation.frameHeight / 5, heroBoundingBoxSize, 0, Math.PI * 2, true);
         } else if (this.flag === 2) {
-            ctx.arc(this.x + this.animation.frameWidth / 4, this.y + this.animation.frameHeight / 2, 13, 0, Math.PI * 2, true);
+            ctx.arc(this.x + this.animation.frameWidth / 4, this.y + this.animation.frameHeight / 2, heroBoundingBoxSize, 0, Math.PI * 2, true);
         } else if (this.flag === 3) {
-            ctx.arc(this.x + this.animation.frameWidth / 1.65, this.y + this.animation.frameHeight / 1.35, 13, 0, Math.PI * 2, true);
+            ctx.arc(this.x + this.animation.frameWidth / 1.65, this.y + this.animation.frameHeight / 1.35, heroBoundingBoxSize, 0, Math.PI * 2, true);
         } else if (this.flag === 4) {
-            ctx.arc(this.x + this.animation.frameWidth / 1.25, this.y + this.animation.frameHeight / 2, 13, 0, Math.PI * 2, true);
+            ctx.arc(this.x + this.animation.frameWidth / 1.25, this.y + this.animation.frameHeight / 2, heroBoundingBoxSize, 0, Math.PI * 2, true);
         }
 
         ctx.stroke();
@@ -848,7 +865,7 @@ ASSET_MANAGER.downloadAll(function () {
 	gameEngine.kp = 0;
     gameEngine.tower = tower;
     gameEngine.enemies = enemies;
-    gameEngine.spawnRate = 250;
+    gameEngine.spawnRate = 50;
     gameEngine.spawnCounter = 0;
     gameEngine.towerHp = 100;
     gameEngine.towerHpDisplay = towerHealth;
@@ -858,6 +875,4 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.dead = false;
    
     gameEngine.start();
-    
-    //s
 });
