@@ -735,7 +735,7 @@ function Hero(game) {
 
     this.boundingBox = new BoundingBox(-game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0, 13);
 
-    Entity.call(this, game, -55, 80);
+    Entity.call(this, game, -170, -40);
 }
 
 Hero.prototype = new Entity();
@@ -875,6 +875,156 @@ Hero.prototype.draw = function (ctx) {
     }
 }
 
+function Hero2(game) {
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 0, 0, 102, 102, .1, 1, true, false);
+    this.movingUP = false;
+    this.movingLEFT = false;
+    this.movingDOWN = false;
+    this.movingRIGHT = false;
+    this.movingRIGHTDOWN = false;
+    this.flag = 0;
+
+    this.boundingBox = new BoundingBox(-game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0, 13);
+
+    Entity.call(this, game, 70, -40);
+}
+
+Hero2.prototype = new Entity();
+Hero2.prototype.constructor = Hero2;
+
+Hero2.prototype.update = function () {
+    this.movingUP = this.game.w;
+    this.movingLEFT = this.game.a;
+    this.movingDOWN = this.game.s;
+    this.movingRIGHT = this.game.d;
+    this.movingRIGHTDOWN = this.game.sd;
+
+    Entity.prototype.update.call(this);
+}
+
+Hero2.prototype.draw = function (ctx) {
+    this.movingSpeed = 2.5;
+    //console.log(this.boundingBox.collide(this.game.tower.boundingBox));
+    if (!this.boundingBox.collide(this.game.tower.boundingBox)) {
+        if (this.game.map["38"] && this.game.map["39"]) {
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y -= this.movingSpeed);
+        }
+
+        else if (this.game.map["38"] && this.game.map["37"]) {
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y -= this.movingSpeed);
+        }
+
+        else if (this.game.map["40"] && this.game.map["39"]) {
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y += this.movingSpeed);
+        }
+
+        else if (this.game.map["40"] && this.game.map["37"]) {
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y += this.movingSpeed);
+        }
+
+        else if (this.game.map["38"]) {
+            if (this.flag === 1) {
+                this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
+            } else {
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 901, 0, 102, 102, .1, 4, true, false);
+                this.flag = 1;
+            }
+        }
+
+        else if (this.game.map["37"]) {
+            if (this.flag === 2) {
+                this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
+            } else {
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 101, 0, 102, 102, .1, 2, true, false);
+                this.flag = 2;
+            }
+
+        }
+
+        else if (this.game.map["40"]) {
+            if (this.flag === 3) {
+                this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
+            } else {
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 501, 0, 102, 102, .1, 4, true, false);
+                this.flag = 3;
+            }
+        }
+
+        else if (this.game.map["39"]) {
+            if (this.flag === 4) {
+                this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
+            } else {
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 301, 0, 102, 102, .1, 2, true, false);
+                this.flag = 4;
+            }
+        }
+    } else {
+        if (this.flag === 1)
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
+        if (this.flag === 2)
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
+        if (this.flag === 3)
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
+        if (this.flag === 4)
+            this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
+
+    }
+
+    if (this.flag === 1) {
+        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.5, this.y + this.animation.frameHeight / 5, 13);
+    } else if (this.flag === 2) {
+        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 4, this.y + this.animation.frameHeight / 2, 13);
+    } else if (this.flag === 3) {
+        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.65, this.y + this.animation.frameHeight / 1.35, 13);
+    } else if (this.flag === 4) {
+        this.boundingBox = new BoundingBox(this.x + this.animation.frameWidth / 1.25, this.y + this.animation.frameHeight / 2, 13);
+    }
+
+    for (var i = 0; i < this.game.enemies.length; i++) {
+        if (!this.game.enemies[i].dead && this.boundingBox.collide(this.game.enemies[i].boundingBox)) {
+            this.game.enemies[i].dead = true;
+            this.game.gold += this.game.enemies[i].pointValue;
+            this.game.scoreDisplay.innerHTML = "Gold: " + this.game.gold;
+            this.game.kp += this.game.enemies[i].pointValue * 100;
+            this.game.kpDisplay.innerHTML = "Kill Points: " + this.game.kp;
+        }
+    }
+
+
+    this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
+
+    if (this.x > this.game.surfaceWidth / 2 + this.animation.frameWidth + 1 - 150) {
+        this.x = -this.game.surfaceWidth / 2 - this.animation.frameWidth;
+    }
+    if (this.x < -this.game.surfaceWidth / 2 - this.animation.frameWidth - 1) {
+        this.x = this.game.surfaceWidth / 2 + this.animation.frameWidth - 150;
+    }
+    if (this.y > this.game.surfaceHeight / 2 + 1) {
+        this.y = -this.game.surfaceHeight / 2 - this.animation.frameHeight / 2;
+    }
+    if (this.y < -this.game.surfaceHeight / 2 - this.animation.frameHeight / 2 - 1) {
+        this.y = this.game.surfaceHeight / 2;
+    }
+
+    if (this.game.showOutlines) {
+        ctx.beginPath();
+        ctx.strokeStyle = "green";
+
+        if (this.flag === 1) {
+            ctx.arc(this.x + this.animation.frameWidth / 1.5, this.y + this.animation.frameHeight / 5, 13, 0, Math.PI * 2, true);
+        } else if (this.flag === 2) {
+            ctx.arc(this.x + this.animation.frameWidth / 4, this.y + this.animation.frameHeight / 2, 13, 0, Math.PI * 2, true);
+        } else if (this.flag === 3) {
+            ctx.arc(this.x + this.animation.frameWidth / 1.65, this.y + this.animation.frameHeight / 1.35, 13, 0, Math.PI * 2, true);
+        } else if (this.flag === 4) {
+            ctx.arc(this.x + this.animation.frameWidth / 1.25, this.y + this.animation.frameHeight / 2, 13, 0, Math.PI * 2, true);
+        }
+
+        ctx.stroke();
+        ctx.closePath();
+    }
+}
+
 function MusicPlayer(game) {
     this.BgAudio = new Audio("music/what is wrong with me.wav");
     this.BgAudio.loop = true;
@@ -889,6 +1039,7 @@ var ASSET_MANAGER = new AssetManager();
 ASSET_MANAGER.queueDownload("./img/stats.png");
 ASSET_MANAGER.queueDownload("./img/castle.png");
 ASSET_MANAGER.queueDownload("./img/sprite.png");
+ASSET_MANAGER.queueDownload("./img/sprite2.png");
 ASSET_MANAGER.queueDownload("./img/monster_sprite.png");
 
 ASSET_MANAGER.downloadAll(function () {
@@ -908,6 +1059,7 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.init(ctx);
     var bg = new Background(gameEngine);
     var hero = new Hero(gameEngine);
+    var hero2 = new Hero2(gameEngine);
     var tower = new Tower(gameEngine);
     
     gameEngine.MusicPlayer = new MusicPlayer();
@@ -916,6 +1068,7 @@ ASSET_MANAGER.downloadAll(function () {
 
     gameEngine.addEntity(bg);
     gameEngine.addEntity(hero);
+    gameEngine.addEntity(hero2);
     gameEngine.addEntity(tower);
 
     
