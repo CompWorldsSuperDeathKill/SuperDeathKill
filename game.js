@@ -150,7 +150,6 @@ GameEngine.prototype.start = function () {
     this.enemies.push(temp);
     this.spawnCounter = 0;
     
-    
     (function gameLoop() {
         that.loop();
         that.spawnEnemy();
@@ -161,7 +160,7 @@ GameEngine.prototype.start = function () {
 GameEngine.prototype.spawnEnemy = function () {
 	this.spawnCounter += this.timer.tick() * this.spawnRate;
 
-	if (Math.floor(this.spawnCounter) === 1) {
+	if (Math.floor(this.spawnCounter) >= 1) {
 	    this.random_number = Math.floor(Math.random() * 50);
 
 	    if (this.random_number <= 12) { // Top
@@ -209,6 +208,9 @@ GameEngine.prototype.startInput = function () {
     this.ctx.canvas.addEventListener("click", function (e) {
         that.running = true;
         that.introText.innerHTML = "";
+    	if (that.MusicPlayer.BgAudio.paused) {
+    		that.MusicPlayer.BgAudio.play();
+    	}
     }, false);
 
     this.ctx.canvas.addEventListener("mousemove", function (e) {
@@ -222,6 +224,14 @@ GameEngine.prototype.startInput = function () {
 
 
     this.ctx.canvas.addEventListener("keydown", function (e) {
+    	console.log(e.keyCode);
+    	if (e.keyCode == 77) {
+    		if (that.MusicPlayer.BgAudio.paused) {
+    			that.MusicPlayer.BgAudio.play();
+    		} else {
+    			that.MusicPlayer.BgAudio.pause();
+    		}
+    	}
 
         that.map[e.keyCode] = true;
 
@@ -255,7 +265,13 @@ GameEngine.prototype.draw = function (drawCallback) {
 }
 
 GameEngine.prototype.update = function () {
-	if (!this.running) return;
+	if (!this.running) {
+		if (!this.MusicPlayer.BgAudio.paused) {
+			this.MusicPlayer.BgAudio.pause();
+		}
+		return;
+	}
+	
 	if (this.dead) {
 		this.gameOver();
 	}
@@ -281,6 +297,11 @@ GameEngine.prototype.gameOver = function () {
 	this.towerHpDisplay.innerHTML = "You have failed.";
 	this.entities = {};
 	this.enemies = {};
+	this.MusicPlayer.BgAudio.pause();
+	this.MusicPlayer.BgAudio = new Audio("music/sad time uh oh.mp3");
+	this.MusicPlayer.BgAudio.loop = false;
+	this.MusicPlayer.BgAudio.volume = .25;
+	this.MusicPlayer.BgAudio.play();
 }
 
 GameEngine.prototype.loop = function () {
@@ -369,6 +390,10 @@ function Tower(game) {
     this.boundingBox = new BoundingBox(0, 0, this.towerImg.width / 3);
     this.rangeBox = new BoundingBox(0, 0, this.towerRange);
     this.chargingPower = 0;
+    this.lazerShotX;
+    this.lazerShotY;
+    this.lazerActive = false;
+    this.lazerOpacity = 0;
 	
     Entity.call(this, game, 0, 0);
 }
@@ -378,13 +403,17 @@ Tower.prototype.constructor = Tower;
 
 Tower.prototype.update = function () {
     if (this.chargingPower <= 100) {
-    	this.chargingPower += 1.3;	//change this to change the rate at which the tower attacks.
+    	this.chargingPower += 1;	//change this to change the rate at which the tower attacks.
     }
     
     if (this.chargingPower >= 100) {
 	    for (var i = 0; i < this.game.enemies.length; i++) {
 	        if (!this.game.enemies[i].dead && this.rangeBox.collide(this.game.enemies[i].boundingBox)) {
 	            this.game.enemies[i].dead = true;
+	            this.lazerShotX = this.game.enemies[i].boundingBox.x;
+	            this.lazerShotY = this.game.enemies[i].boundingBox.y;
+	            this.lazerActive = true;
+	            this.lazerOpacity = 1;
 	            this.test = this.game.enemies[i];
 	            this.game.gold += this.game.enemies[i].pointValue;
 	            this.game.scoreDisplay.innerHTML = "Gold: " + this.game.gold;
@@ -422,9 +451,11 @@ Tower.prototype.draw = function (ctx) {
     ctx.drawImage(this.towerImg, 0 - this.towerImg.width / 2, 0 - this.towerImg.height / 2,
 		    		this.towerImg.width, this.towerImg.height);
     
+    ctx.lineWidth = 1;
+    
     ctx.beginPath();
     ctx.strokeStyle = "blue"
-    ctx.rect(-53, 75, 102, 5);
+    ctx.rect(-53, 75, 103, 5);
     ctx.stroke();
     ctx.closePath();
     
@@ -433,6 +464,10 @@ Tower.prototype.draw = function (ctx) {
     ctx.rect(-52, 75 + 1, this.chargingPower, 5 - 2);
     ctx.fill();
     ctx.closePath();
+    
+    if (this.lazerActive) {
+    	this.drawLazer(ctx);
+    }
 
     if (this.game.showOutlines) {
         ctx.beginPath();
@@ -447,6 +482,22 @@ Tower.prototype.draw = function (ctx) {
         ctx.stroke();
         ctx.closePath();
     }
+}
+
+Tower.prototype.drawLazer = function (ctx) {
+	ctx.beginPath();
+	ctx.lineWidth = 5;
+	ctx.strokeStyle = "rgba(0, 200, 200, " + this.lazerOpacity + ")";
+	ctx.moveTo(0, 0);
+	ctx.lineTo(this.lazerShotX, this.lazerShotY);
+	ctx.stroke();
+	ctx.lineWidth = 1;
+	ctx.closePath();
+	this.lazerOpacity -= 0.05;
+	if (this.lazerOpacity <= 0) {
+		this.lazerActive = false;
+		this.lazerOpacity = 0;
+	}
 }
 
 
@@ -824,6 +875,13 @@ Hero.prototype.draw = function (ctx) {
     }
 }
 
+function MusicPlayer(game) {
+    this.BgAudio = new Audio("music/what is wrong with me.wav");
+    this.BgAudio.loop = true;
+    this.BgAudio.volume = .25;
+}
+
+
 // the "main" code begins here
 
 var ASSET_MANAGER = new AssetManager();
@@ -851,6 +909,8 @@ ASSET_MANAGER.downloadAll(function () {
     var bg = new Background(gameEngine);
     var hero = new Hero(gameEngine);
     var tower = new Tower(gameEngine);
+    
+    gameEngine.MusicPlayer = new MusicPlayer();
 
     gameEngine.showOutlines = true;
 
@@ -865,7 +925,7 @@ ASSET_MANAGER.downloadAll(function () {
 	gameEngine.kp = 0;
     gameEngine.tower = tower;
     gameEngine.enemies = enemies;
-    gameEngine.spawnRate = 50;
+    gameEngine.spawnRate = 250;
     gameEngine.spawnCounter = 0;
     gameEngine.towerHp = 100;
     gameEngine.towerHpDisplay = towerHealth;
@@ -875,4 +935,5 @@ ASSET_MANAGER.downloadAll(function () {
     gameEngine.dead = false;
    
     gameEngine.start();
+    
 });
