@@ -116,7 +116,6 @@ Timer.prototype.tick = function () {
 
     var gameDelta = Math.min(wallDelta, this.maxStep);
     this.gameTime += gameDelta;
-    console.log(gameDelta);
     
     return this.maxStep;
 }
@@ -151,7 +150,7 @@ GameEngine.prototype.start = function () {
     this.addEntity(temp);
     this.enemies.push(temp);
     this.spawnCounter = 0;
-    
+    this.numEnemiesSpawned = 0;
     (function gameLoop() {
         that.loop();
         that.spawnEnemy();
@@ -160,12 +159,17 @@ GameEngine.prototype.start = function () {
 }
 
 GameEngine.prototype.spawnEnemy = function () {
-    this.spawnCounter += this.timer.tick() * this.spawnRate;
-
+	
+    this.spawnCounter += this.timer.tick() * this.spawnRate;	
     this.random_monster_type = Math.floor(Math.random() * 5);
 
 
     if (Math.floor(this.spawnCounter) >= .5) {
+		this.numEnemiesSpawned += 1;
+		if (this.numEnemiesSpawned >= 25) {
+			this.numEnemiesSpawned = 0;
+			this.spawnRate += .25;
+		}
         this.random_number = Math.floor(Math.random() * 50);
         //console.log(this.random_number);
         //Original Monster
@@ -337,29 +341,36 @@ GameEngine.prototype.startInput = function () {
     			that.MusicPlayer.BgAudio.pause();
     		}
     	} else if (e.keyCode == 81 && that.gold >= 200) { //upgrade tower range if user hits q (and has 200 gold)
-			console.log("USER HIT Q KEY *****************************************");
 			that.gold -= 200;
-			that.tower.towerRange += 2;
+			that.tower.towerRange += that.tower.towerRangeUpgrade;
+			if(that.tower.towerRangeUpgrade >= 5) {
+				that.tower.towerRangeUpgrade -= 3;
+			}
             that.scoreDisplay.innerHTML = "Gold: " + that.gold;
-		} else if (e.keyCode == 69 && that.gold >= 300) { //upgrade tower attack speed if user hits e (and has 300 gold)
-			console.log("USER HIT E KEY *****************************************");
-			that.gold -= 300;
-			that.tower.chargingRate += .25;
+		} else if (e.keyCode == 69 && that.gold >= 3) { //upgrade tower attack speed if user hits e (and has 300 gold)
+			that.gold -= 3;
+			that.tower.chargingRate += that.tower.chargingRateUpgrade;
+			if(that.tower.chargingRateUpgrade >= .25) {		//initially upgrades charging rate by .5, .45, .4, .35, .3, .25, .25, .25 ........
+				that.tower.chargingRateUpgrade -= .05;
+			}
             that.scoreDisplay.innerHTML = "Gold: " + that.gold;
 		} else if (e.keyCode == 82 && that.gold >= 250) { //restore 5 tower health if user hits r (and has 250 gold)
-			console.log("USER HIT R KEY *****************************************");
 			that.gold -= 250;
-			that.towerHp += 5;
+			that.towerHp += 12;
             that.towerHpDisplay.innerHTML = "Tower Health: " + that.towerHp;
             that.scoreDisplay.innerHTML = "Gold: " + that.gold;
 		} else if (e.keyCode == 70 && that.kp >= 100000) { //restore hero movement speed if user hits f (and has 100,000 kill points)
-			console.log("USER HIT F KEY *****************************************");
 			that.kp -= 100000;
 			that.kpDisplay.innerHTML = "Kill Points: " + that.kp;
-			that.hero.movingSpeed += .5;
-			that.hero2.movingSpeed += .5;
+			that.hero.movingSpeed += that.hero.moveSpdUpgd;
+			that.hero2.movingSpeed += that.hero2.moveSpdUpgd;
+			if(that.hero.moveSpdUpgd >= .25) {				//initially upgrades movement speed by .5, then by .45, .4, .35, .3, .25, .25, .25 and so on...
+				that.hero.moveSpdUpgd -= .05;
+			}
+			if(that.hero2.moveSpdUpgd >= .25) {
+				that.hero2.moveSpdUpgd -= .05;
+			}
 		}
-		
         that.map[e.keyCode] = true;
 
     }, false);
@@ -418,6 +429,8 @@ GameEngine.prototype.update = function () {
             this.entities.splice(i, 1);
         }
     }
+	
+	
 }
 
 GameEngine.prototype.gameOver = function () {
@@ -513,6 +526,7 @@ Background.prototype.draw = function (ctx) {
 
 function Tower(game) {
 	this.towerRange = 100;
+	this.towerRangeUpgrade = 20;
     this.towerImg = ASSET_MANAGER.getAsset("./img/castle.png");
     this.boundingBox = new BoundingBox(0, 0, this.towerImg.width / 3);
     this.rangeBox = new BoundingBox(0, 0, this.towerRange);
@@ -522,6 +536,7 @@ function Tower(game) {
     this.lazerActive = false;
     this.lazerOpacity = 0;
     this.chargingRate = 1;
+	this.chargingRateUpgrade = .5;
 	
     Entity.call(this, game, 0, 0);
 }
@@ -535,6 +550,7 @@ Tower.prototype.update = function () {
     }
     
     if (this.chargingPower >= 100) {
+		this.chargingPower = 100;
 	    for (var i = 0; i < this.game.enemies.length; i++) {
 	        if (!this.game.enemies[i].dead && this.rangeBox.collide(this.game.enemies[i].boundingBox)) {
 	            this.game.enemies[i].dead = true;
@@ -869,7 +885,7 @@ function Hero(game) {
     this.movingRIGHTDOWN = false;
     this.flag = 0;
     this.movingSpeed = 2.5;
-
+	this.moveSpdUpgd = .5;
     this.boundingBox = new BoundingBox(-game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0, 13);
 
     Entity.call(this, game, -170, -40);
@@ -1026,7 +1042,8 @@ function Hero2(game) {
     this.movingRIGHTDOWN = false;
     this.flag = 0;
     this.movingSpeed = 2.5;
-
+	this.moveSpdUpgd = .5;
+	
     this.boundingBox = new BoundingBox(-game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0, 13);
 
     Entity.call(this, game, 70, -40);
@@ -1235,7 +1252,7 @@ ASSET_MANAGER.downloadAll(function () {
 	gameEngine.kp = 0;
     gameEngine.tower = tower;
     gameEngine.enemies = enemies;
-    gameEngine.spawnRate = 1;
+    gameEngine.spawnRate = .5;
     gameEngine.spawnCounter = 0;
     gameEngine.towerHp = 100;
     gameEngine.towerHpDisplay = towerHealth;
