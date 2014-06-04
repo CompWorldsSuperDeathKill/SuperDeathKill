@@ -116,7 +116,9 @@ Timer.prototype.tick = function () {
 
     var gameDelta = Math.min(wallDelta, this.maxStep);
     this.gameTime += gameDelta;
-    return gameDelta;
+    console.log(gameDelta);
+    
+    return this.maxStep;
 }
 
 function GameEngine() {
@@ -159,8 +161,8 @@ GameEngine.prototype.start = function () {
 
 GameEngine.prototype.spawnEnemy = function () {
 	this.spawnCounter += this.timer.tick() * this.spawnRate;
-	console.log("spawn counter: " + this.spawnCounter);
-	console.log("timer tick: " + this.timer.tick());
+	//console.log("spawn counter: " + this.spawnCounter);
+	//console.log("timer tick: " + this.timer.tick());
 	if (Math.floor(this.spawnCounter) >= .5) {
 	    this.random_number = Math.floor(Math.random() * 50);
 		//console.log(this.random_number);
@@ -232,18 +234,28 @@ GameEngine.prototype.startInput = function () {
     		} else {
     			that.MusicPlayer.BgAudio.pause();
     		}
-    	} else if (e.keyCode == 81) { //upgrade tower range if user hits q (and has 200 gold)
+    	} else if (e.keyCode == 81 && that.gold >= 200) { //upgrade tower range if user hits q (and has 200 gold)
 			console.log("USER HIT Q KEY *****************************************");
-			
-		} else if (e.keyCode == 69) { //upgrade tower attack speed if user hits e (and has 300 gold)
+			that.gold -= 200;
+			that.tower.towerRange += 2;
+            that.scoreDisplay.innerHTML = "Gold: " + that.gold;
+		} else if (e.keyCode == 69 && that.gold >= 300) { //upgrade tower attack speed if user hits e (and has 300 gold)
 			console.log("USER HIT E KEY *****************************************");
-			
-		} else if (e.keyCode == 82) { //restore 5 tower health if user hits r (and has 250 gold)
+			that.gold -= 300;
+			that.tower.chargingRate += .25;
+            that.scoreDisplay.innerHTML = "Gold: " + that.gold;
+		} else if (e.keyCode == 82 && that.gold >= 250) { //restore 5 tower health if user hits r (and has 250 gold)
 			console.log("USER HIT R KEY *****************************************");
-			
-		} else if (e.keyCode == 70) { //restore hero movement speed if user hits f (and has 100,000 kill points)
+			that.gold -= 250;
+			that.towerHp += 5;
+            that.towerHpDisplay.innerHTML = "Tower Health: " + that.towerHp;
+            that.scoreDisplay.innerHTML = "Gold: " + that.gold;
+		} else if (e.keyCode == 70 && that.kp >= 100000) { //restore hero movement speed if user hits f (and has 100,000 kill points)
 			console.log("USER HIT F KEY *****************************************");
-			
+			that.kp -= 100000;
+			that.kpDisplay.innerHTML = "Kill Points: " + that.kp;
+			that.hero.movingSpeed += .5;
+			that.hero2.movingSpeed += .5;
 		}
 		
         that.map[e.keyCode] = true;
@@ -307,7 +319,7 @@ GameEngine.prototype.update = function () {
 }
 
 GameEngine.prototype.gameOver = function () {
-	this.towerHpDisplay.innerHTML = "You have failed.";
+	this.towerHpDisplay.innerHTML = "You have failed. You lasted " + Math.floor(this.timer.gameTime) + " seconds against the onslaught.";
 	this.entities = {};
 	this.enemies = {};
 	this.MusicPlayer.BgAudio.pause();
@@ -407,6 +419,7 @@ function Tower(game) {
     this.lazerShotY;
     this.lazerActive = false;
     this.lazerOpacity = 0;
+    this.chargingRate = 1;
 	
     Entity.call(this, game, 0, 0);
 }
@@ -416,7 +429,7 @@ Tower.prototype.constructor = Tower;
 
 Tower.prototype.update = function () {
     if (this.chargingPower <= 100) {
-    	this.chargingPower += 1;	//change this to change the rate at which the tower attacks.
+    	this.chargingPower += this.chargingRate;	//change this to change the rate at which the tower attacks.
     }
     
     if (this.chargingPower >= 100) {
@@ -488,13 +501,12 @@ Tower.prototype.draw = function (ctx) {
         ctx.arc(0, 0, this.towerImg.width / 3, 0, Math.PI * 2, true);
         ctx.stroke();
         ctx.closePath();
-        
-        ctx.beginPath();
-        ctx.strokeStyle = "red";
-        ctx.arc(0, 0, this.towerRange, 0, Math.PI * 2, true);
-        ctx.stroke();
-        ctx.closePath();
     }
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.arc(0, 0, this.towerRange, 0, Math.PI * 2, true);
+    ctx.stroke();
+    ctx.closePath();
 }
 
 Tower.prototype.drawLazer = function (ctx) {
@@ -738,13 +750,16 @@ Monster.prototype.draw = function (ctx) {
 
 
 function Hero(game) {
-    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 0, 0, 102, 102, .1, 1, true, false);
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 0, 0, 102, 102, 2, 1, true, false);
+
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 0, 0, 102, 102, 1, 1, true, false);
     this.movingUP = false;
     this.movingLEFT = false;
     this.movingDOWN = false;
     this.movingRIGHT = false;
     this.movingRIGHTDOWN = false;
     this.flag = 0;
+    this.movingSpeed = 2.5;
 
     this.boundingBox = new BoundingBox(-game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0, 13);
 
@@ -766,7 +781,6 @@ Hero.prototype.update = function () {
 
 Hero.prototype.draw = function (ctx) {
    	this.game.ctx.drawImage(background, -450, -350);
-    this.movingSpeed = 2.5;
     if (!this.boundingBox.collide(this.game.tower.boundingBox)) {
         if (this.game.map["87"] && this.game.map["68"]) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y -= this.movingSpeed);
@@ -788,7 +802,8 @@ Hero.prototype.draw = function (ctx) {
             if (this.flag === 1) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
             } else {
-                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 901, 0, 102, 102, .1, 4, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 901, 0, 102, 102, 2, 4, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 901, 0, 102, 102, 1, 4, true, false);
                 this.flag = 1;
             }
         }
@@ -797,7 +812,8 @@ Hero.prototype.draw = function (ctx) {
             if (this.flag === 2) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
             } else {
-                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 101, 0, 102, 102, .1, 2, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 101, 0, 102, 102, 2, 2, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 101, 0, 102, 102, 1, 2, true, false);
                 this.flag = 2;
             }
         }
@@ -806,7 +822,8 @@ Hero.prototype.draw = function (ctx) {
             if (this.flag === 3) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
             } else {
-                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 501, 0, 102, 102, .1, 4, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 501, 0, 102, 102, 2, 4, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 501, 0, 102, 102, 1, 4, true, false);
                 this.flag = 3;
             }
         }
@@ -815,7 +832,8 @@ Hero.prototype.draw = function (ctx) {
             if (this.flag === 4) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
             } else {
-                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 301, 0, 102, 102, .1, 2, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 301, 0, 102, 102, 2, 2, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 301, 0, 102, 102, 1, 2, true, false);
                 this.flag = 4;
             }
         }
@@ -890,13 +908,15 @@ Hero.prototype.draw = function (ctx) {
 }
 
 function Hero2(game) {
-    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 0, 0, 102, 102, .1, 1, true, false);
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 0, 0, 102, 102, 2, 1, true, false);
+    this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 0, 0, 102, 102, 1, 1, true, false);
     this.movingUP = false;
     this.movingLEFT = false;
     this.movingDOWN = false;
     this.movingRIGHT = false;
     this.movingRIGHTDOWN = false;
     this.flag = 0;
+    this.movingSpeed = 2.5;
 
     this.boundingBox = new BoundingBox(-game.surfaceWidth / 2 - this.animation.frameWidth / 2, 0, 13);
 
@@ -918,58 +938,61 @@ Hero2.prototype.update = function () {
 
 Hero2.prototype.draw = function (ctx) {
    
-   this.movingSpeed = 2.5;
     //console.log(this.boundingBox.collide(this.game.tower.boundingBox));
     if (!this.boundingBox.collide(this.game.tower.boundingBox)) {
-        if (this.game.map["38"] && this.game.map["39"]) {
+        if (this.game.map["73"] && this.game.map["76"]) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y -= this.movingSpeed);
         }
 
-        else if (this.game.map["38"] && this.game.map["37"]) {
+        else if (this.game.map["73"] && this.game.map["74"]) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y -= this.movingSpeed);
         }
 
-        else if (this.game.map["40"] && this.game.map["39"]) {
+        else if (this.game.map["75"] && this.game.map["76"]) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y += this.movingSpeed);
         }
 
-        else if (this.game.map["40"] && this.game.map["37"]) {
+        else if (this.game.map["75"] && this.game.map["74"]) {
             this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y += this.movingSpeed);
         }
 
-        else if (this.game.map["38"]) {
+        else if (this.game.map["73"]) {
             if (this.flag === 1) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
             } else {
-                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 901, 0, 102, 102, .1, 4, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 901, 0, 102, 102, 2, 4, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 901, 0, 102, 102, 1, 4, true, false);
                 this.flag = 1;
             }
         }
 
-        else if (this.game.map["37"]) {
+        else if (this.game.map["74"]) {
             if (this.flag === 2) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
             } else {
-                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 101, 0, 102, 102, .1, 2, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 101, 0, 102, 102, 2, 2, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 101, 0, 102, 102, 1, 2, true, false);
                 this.flag = 2;
             }
 
         }
 
-        else if (this.game.map["40"]) {
+        else if (this.game.map["75"]) {
             if (this.flag === 3) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
             } else {
-                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 501, 0, 102, 102, .1, 4, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 501, 0, 102, 102, 2, 4, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 501, 0, 102, 102, 1, 4, true, false);
                 this.flag = 3;
             }
         }
 
-        else if (this.game.map["39"]) {
+        else if (this.game.map["76"]) {
             if (this.flag === 4) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
             } else {
-                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 301, 0, 102, 102, .1, 2, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 301, 0, 102, 102, 2, 2, true, false);
+                this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 301, 0, 102, 102, 1, 2, true, false);
                 this.flag = 4;
             }
         }
@@ -1043,7 +1066,7 @@ Hero2.prototype.draw = function (ctx) {
 }
 
 function MusicPlayer(game) {
-    this.BgAudio = new Audio("music/what is wrong with me.wav");
+    this.BgAudio = new Audio("music/what is wrong with me.mp3");
     this.BgAudio.loop = true;
     this.BgAudio.volume = .25;
 }
@@ -1085,12 +1108,15 @@ ASSET_MANAGER.downloadAll(function () {
 		
     gameEngine.MusicPlayer = new MusicPlayer();
 
-    gameEngine.showOutlines = true;
+    gameEngine.showOutlines = false;
 
     gameEngine.addEntity(bg);
     gameEngine.addEntity(hero);
     gameEngine.addEntity(hero2);
     gameEngine.addEntity(tower);
+    
+    gameEngine.hero = hero;
+    gameEngine.hero2 = hero2;
 
     
     gameEngine.scoreDisplay = gold;
@@ -1099,7 +1125,7 @@ ASSET_MANAGER.downloadAll(function () {
 	gameEngine.kp = 0;
     gameEngine.tower = tower;
     gameEngine.enemies = enemies;
-    gameEngine.spawnRate = 250;
+    gameEngine.spawnRate = 1;
     gameEngine.spawnCounter = 0;
     gameEngine.towerHp = 100;
     gameEngine.towerHpDisplay = towerHealth;
