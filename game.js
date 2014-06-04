@@ -594,7 +594,7 @@ Tower.prototype.draw = function (ctx) {
     ctx.closePath();
     
     if (this.lazerActive) {
-    	this.drawLazer(ctx);
+        this.drawLazer(ctx);
     }
 
     if (this.game.showOutlines) {
@@ -614,7 +614,7 @@ Tower.prototype.draw = function (ctx) {
 Tower.prototype.drawLazer = function (ctx) {
 	ctx.beginPath();
 	ctx.lineWidth = 5;
-	ctx.strokeStyle = "rgba(0, 200, 200, " + this.lazerOpacity + ")";
+	ctx.strokeStyle = "rgba(255, 0, 0, " + this.lazerOpacity + ")";
 	ctx.moveTo(0, 0);
 	ctx.lineTo(this.lazerShotX, this.lazerShotY);
 	ctx.stroke();
@@ -622,9 +622,16 @@ Tower.prototype.drawLazer = function (ctx) {
 	ctx.closePath();
 	this.lazerOpacity -= 0.05;
 	if (this.lazerOpacity <= 0) {
+	    this.BgAudio = new Audio("music/laser.mp3");
+	    this.BgAudio.loop = false;
+	    this.BgAudio.volume = .50;
+	    this.BgAudio.play();
+
 		this.lazerActive = false;
 		this.lazerOpacity = 0;
 	}
+
+	
 }
 
 
