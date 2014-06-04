@@ -622,10 +622,10 @@ Tower.prototype.drawLazer = function (ctx) {
 	ctx.closePath();
 	this.lazerOpacity -= 0.05;
 	if (this.lazerOpacity <= 0) {
-	    this.BgAudio = new Audio("music/laser.mp3");
-	    this.BgAudio.loop = false;
-	    this.BgAudio.volume = .50;
-	    this.BgAudio.play();
+	    this.laserSound = new Audio("music/laser.mp3");
+	    this.laserSound.loop = false;
+	    this.laserSound.volume = .50;
+	    this.laserSound.play();
 
 		this.lazerActive = false;
 		this.lazerOpacity = 0;
