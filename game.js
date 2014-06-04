@@ -168,7 +168,7 @@ GameEngine.prototype.spawnEnemy = function () {
 		this.numEnemiesSpawned += 1;
 		if (this.numEnemiesSpawned >= 25) {
 			this.numEnemiesSpawned = 0;
-			this.spawnRate += .25;
+			this.spawnRate += .1;
 		}
         this.random_number = Math.floor(Math.random() * 50);
         //console.log(this.random_number);
