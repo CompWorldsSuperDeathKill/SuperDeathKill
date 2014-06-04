@@ -347,8 +347,8 @@ GameEngine.prototype.startInput = function () {
 				that.tower.towerRangeUpgrade -= 3;
 			}
             that.scoreDisplay.innerHTML = "Gold: " + that.gold;
-		} else if (e.keyCode == 69 && that.gold >= 3) { //upgrade tower attack speed if user hits e (and has 300 gold)
-			that.gold -= 3;
+		} else if (e.keyCode == 69 && that.gold >= 300) { //upgrade tower attack speed if user hits e (and has 300 gold)
+			that.gold -= 300;
 			that.tower.chargingRate += that.tower.chargingRateUpgrade;
 			if(that.tower.chargingRateUpgrade >= .25) {		//initially upgrades charging rate by .5, .45, .4, .35, .3, .25, .25, .25 ........
 				that.tower.chargingRateUpgrade -= .05;
