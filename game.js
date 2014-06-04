@@ -751,8 +751,11 @@ Monster.prototype.draw = function (ctx) {
 
 function Hero(game) {
     this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 0, 0, 102, 102, 2, 1, true, false);
+<<<<<<< HEAD
 
     this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 0, 0, 102, 102, 1, 1, true, false);
+=======
+>>>>>>> FETCH_HEAD
     this.movingUP = false;
     this.movingLEFT = false;
     this.movingDOWN = false;
@@ -803,7 +806,10 @@ Hero.prototype.draw = function (ctx) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
             } else {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 901, 0, 102, 102, 2, 4, true, false);
+<<<<<<< HEAD
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 901, 0, 102, 102, 1, 4, true, false);
+=======
+>>>>>>> FETCH_HEAD
                 this.flag = 1;
             }
         }
@@ -813,7 +819,10 @@ Hero.prototype.draw = function (ctx) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
             } else {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 101, 0, 102, 102, 2, 2, true, false);
+<<<<<<< HEAD
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 101, 0, 102, 102, 1, 2, true, false);
+=======
+>>>>>>> FETCH_HEAD
                 this.flag = 2;
             }
         }
@@ -823,7 +832,10 @@ Hero.prototype.draw = function (ctx) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
             } else {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 501, 0, 102, 102, 2, 4, true, false);
+<<<<<<< HEAD
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 501, 0, 102, 102, 1, 4, true, false);
+=======
+>>>>>>> FETCH_HEAD
                 this.flag = 3;
             }
         }
@@ -833,7 +845,10 @@ Hero.prototype.draw = function (ctx) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
             } else {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 301, 0, 102, 102, 2, 2, true, false);
+<<<<<<< HEAD
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite.png"), 301, 0, 102, 102, 1, 2, true, false);
+=======
+>>>>>>> FETCH_HEAD
                 this.flag = 4;
             }
         }
@@ -909,7 +924,10 @@ Hero.prototype.draw = function (ctx) {
 
 function Hero2(game) {
     this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 0, 0, 102, 102, 2, 1, true, false);
+<<<<<<< HEAD
     this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 0, 0, 102, 102, 1, 1, true, false);
+=======
+>>>>>>> FETCH_HEAD
     this.movingUP = false;
     this.movingLEFT = false;
     this.movingDOWN = false;
@@ -961,7 +979,10 @@ Hero2.prototype.draw = function (ctx) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y -= this.movingSpeed);
             } else {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 901, 0, 102, 102, 2, 4, true, false);
+<<<<<<< HEAD
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 901, 0, 102, 102, 1, 4, true, false);
+=======
+>>>>>>> FETCH_HEAD
                 this.flag = 1;
             }
         }
@@ -971,7 +992,10 @@ Hero2.prototype.draw = function (ctx) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x -= this.movingSpeed, this.y);
             } else {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 101, 0, 102, 102, 2, 2, true, false);
+<<<<<<< HEAD
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 101, 0, 102, 102, 1, 2, true, false);
+=======
+>>>>>>> FETCH_HEAD
                 this.flag = 2;
             }
 
@@ -982,7 +1006,10 @@ Hero2.prototype.draw = function (ctx) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x, this.y += this.movingSpeed);
             } else {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 501, 0, 102, 102, 2, 4, true, false);
+<<<<<<< HEAD
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 501, 0, 102, 102, 1, 4, true, false);
+=======
+>>>>>>> FETCH_HEAD
                 this.flag = 3;
             }
         }
@@ -992,7 +1019,10 @@ Hero2.prototype.draw = function (ctx) {
                 this.animation.drawFrame(this.game.clockTick, ctx, this.x += this.movingSpeed, this.y);
             } else {
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 301, 0, 102, 102, 2, 2, true, false);
+<<<<<<< HEAD
                 this.animation = new Animation(ASSET_MANAGER.getAsset("./img/sprite2.png"), 301, 0, 102, 102, 1, 2, true, false);
+=======
+>>>>>>> FETCH_HEAD
                 this.flag = 4;
             }
         }
