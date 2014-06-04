@@ -160,33 +160,135 @@ GameEngine.prototype.start = function () {
 }
 
 GameEngine.prototype.spawnEnemy = function () {
-	this.spawnCounter += this.timer.tick() * this.spawnRate;
-	//console.log("spawn counter: " + this.spawnCounter);
-	//console.log("timer tick: " + this.timer.tick());
-	if (Math.floor(this.spawnCounter) >= .5) {
-	    this.random_number = Math.floor(Math.random() * 50);
-		//console.log(this.random_number);
-	    if (this.random_number <= 12) { // Top
-	        var temp = new Monster(this, "./img/monster_sprite.png", 104.4, 0, 52.2, 50, .5, 2, this.random_number)
-	        this.addEntity(temp);
-	        this.enemies.push(temp);
-	        this.spawnCounter = 0;
-	    } else if (this.random_number > 12 && this.random_number <= 25) { // right
-	        var temp = new Monster(this, "./img/monster_sprite.png", 208.8, 0, 52.2, 50, .5, 3, this.random_number)
-	        this.addEntity(temp);
-	        this.enemies.push(temp);
-	        this.spawnCounter = 0;
-	    } else if (this.random_number > 25 && this.random_number <= 38) { // Bottom
-	        var temp = new Monster(this, "./img/monster_sprite.png", 0, 0, 52.2, 50, .5, 2, this.random_number)
-	        this.addEntity(temp);
-	        this.enemies.push(temp);
-	        this.spawnCounter = 0;
-	    } else {    // Right
-	        var temp = new Monster(this, "./img/monster_sprite.png", 365.4, 0, 52.2, 50, .5, 3, this.random_number)
-	        this.addEntity(temp);
-	        this.enemies.push(temp);
-	        this.spawnCounter = 0;
-	    }
+    this.spawnCounter += this.timer.tick() * this.spawnRate;
+
+    this.random_monster_type = Math.floor(Math.random() * 5);
+
+
+    if (Math.floor(this.spawnCounter) >= .5) {
+        this.random_number = Math.floor(Math.random() * 50);
+        //console.log(this.random_number);
+        //Original Monster
+        if (Math.floor(this.spawnCounter) >= .5) {
+            this.random_number = Math.floor(Math.random() * 50);
+            //console.log(this.random_number);
+
+            if (this.random_monster_type == 0) {
+                if (this.random_number <= 12) { // Top
+                    var temp = new Monster(this, "./img/monster_sprite.png", 104.4, 0, 52.2, 50, .5, 2, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 12 && this.random_number <= 25) { // right
+                    var temp = new Monster(this, "./img/monster_sprite.png", 208.8, 0, 52.2, 50, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 25 && this.random_number <= 38) { // Bottom
+                    var temp = new Monster(this, "./img/monster_sprite.png", 0, 0, 52.2, 50, .5, 2, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else {    // Right
+                    var temp = new Monster(this, "./img/monster_sprite.png", 365.4, 0, 52.2, 50, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                }
+            } else if (this.random_monster_type === 1) {
+                if (this.random_number <= 12) { // Top
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 0, 0, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 12 && this.random_number <= 25) { // right
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 0, 32, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 25 && this.random_number <= 38) { // Bottom
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 0, 96, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else {    // Left
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 0, 64, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                }
+
+            } else if (this.random_monster_type === 2) {
+                if (this.random_number <= 12) { // Top
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 0, 128, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 12 && this.random_number <= 25) { // right
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 0, 160, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 25 && this.random_number <= 38) { // Bottom
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 0, 224, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else {    // Left
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 0, 192, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                }
+
+            } else if (this.random_monster_type === 3) {
+                if (this.random_number <= 12) { // Top
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 96, 128, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 12 && this.random_number <= 25) { // right
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 96, 160, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 25 && this.random_number <= 38) { // Bottom
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 96, 224, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else {    // Left
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 96, 192, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                }
+
+            } else {
+                if (this.random_number <= 12) { // Top
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 96, 0, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 12 && this.random_number <= 25) { // right
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 96, 32, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else if (this.random_number > 25 && this.random_number <= 38) { // Bottom
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 96, 96, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                } else {    // Left
+                    var temp = new Monster(this, "./img/monsters_sprites.png", 96, 64, 32, 32, .5, 3, this.random_number)
+                    this.addEntity(temp);
+                    this.enemies.push(temp);
+                    this.spawnCounter = 0;
+                }
+            }
+
+        }
 	}
 }
 
@@ -1081,6 +1183,7 @@ ASSET_MANAGER.queueDownload("./img/castle.png");
 ASSET_MANAGER.queueDownload("./img/sprite.png");
 ASSET_MANAGER.queueDownload("./img/sprite2.png");
 ASSET_MANAGER.queueDownload("./img/monster_sprite.png");
+ASSET_MANAGER.queueDownload("./img/monsters_sprites.png");
 ASSET_MANAGER.queueDownload("./img/map.png");
 
 ASSET_MANAGER.downloadAll(function () {
