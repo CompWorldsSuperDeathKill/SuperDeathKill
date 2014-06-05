@@ -1,4 +1,0 @@
-SuperDeathKill
-==============
-
-Computational Worlds Project
