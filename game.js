@@ -485,7 +485,7 @@ GameEngine.prototype.gameOver = function () {
 	this.entities = {};
 	this.enemies = {};
 	this.MusicPlayer.BgAudio.pause();
-	this.MusicPlayer.BgAudio = new Audio("music/sad time uh oh.mp3");
+	this.MusicPlayer.BgAudio = this.MusicPlayer.BgAudio = MUSIC_MANAGER.getAsset("./music/sad time uh oh.mp3");
 	this.MusicPlayer.BgAudio.loop = false;
 	this.MusicPlayer.BgAudio.volume = .25;
 	this.MusicPlayer.BgAudio.play();
